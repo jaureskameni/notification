@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+	<changeSet id="NOTIF-1:1" author="kameni.nguematcha">
+		<createTable tableName="t_inbox_event">
+			<column name="c_id" type="varchar(36)">
+				<constraints nullable="false" primaryKey="true"
+					primaryKeyName="pk_inbox_event" />
+			</column>
+			<column name="c_type" type="varchar(30)" />
+			<column name="c_topic" type="varchar(20)" />
+			<column name="c_key" type="varchar(36)" />
+			<column name="c_data" type="text" />
+			<column name="c_status" type="varchar(15)" />
+			<column name="c_created_at" type="timestamp" />
+			<column name="c_processed_at" type="timestamp" />
+		</createTable>
+	</changeSet>
+</databaseChangeLog>

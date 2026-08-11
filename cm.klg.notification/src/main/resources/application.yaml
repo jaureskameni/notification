@@ -1,0 +1,67 @@
+---
+server:
+  port: 8089
+  shutdown: "graceful"
+spring:
+  application:
+    name: "notification"
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: "${KEYCLOAK_ISSUER_URI}"
+  datasource:
+    url: "jdbc:postgresql://${POSTGRES_HOST:localhost}:${APP_POSTGRES_PORT:5432}/${APP_DB_NAME:notification}"
+    username: "${POSTGRES_ADMIN_USER:zlink}"
+    password: "${POSTGRES_ADMIN_PASSWORD:}"
+    driver-class-name: "org.postgresql.Driver"
+  jpa:
+    hibernate:
+      ddl-auto: "validate"
+    show-sql: false
+    properties:
+      hibernate:
+        type:
+          preferred_uuid_jdbc_type: "varchar"
+  liquibase:
+    change-log: "classpath:cm/klg/notification/repository/liquibase/changelog/master.xml"
+    enabled: true
+  cloud:
+    function:
+      definition: "user; serviceProvider"
+    stream:
+      bindings:
+        serviceRequest-out-0:
+          group: "${spring.application.name}"
+          destination: "serviceRequest"
+        serviceProvider-in-0:
+          group: "${spring.application.name}"
+          destination: "serviceProvider"
+        user-in-0:
+          group: "${spring.application.name}"
+          destination: "user"
+      kafka:
+        binder:
+          brokers: "${KAFKA_URL}"
+          auto-add-partitions: true
+      output-bindings: "serviceRequest"
+jk-dev:
+  events-messaging:
+    inbox:
+      enabled: "${DOMAIN_EVENTS_MESSAGING_CONSUMER_ENABLED:true}"
+      batchSize: "${SCHEDULER_EVENT_NOTIFICATION_BATCH_SIZE:1000}"
+      frequency: "${SCHEDULER_EVENT_NOTIFICATION_FREQUENCY:5000}"
+    outbox:
+      enabled: "${DOMAIN_EVENTS_MESSAGING_PUBLISHER_ENABLED:false}"
+      batchSize: "${SCHEDULER_EVENT_NOTIFICATION_BATCH_SIZE:1000}"
+      frequency: "${SCHEDULER_EVENT_NOTIFICATION_FREQUENCY:5000}"
+logging:
+  level:
+    root: "INFO"
+    cm.klg.notification: "DEBUG"
+    org.springframework.web: "INFO"
+    org.springframework.security: "INFO"
+    org.hibernate: "INFO"
+    org.springframework.boot.autoconfigure.liquibase: "DEBUG"
+    liquibase: "INFO"
+    org.hibernate.tool.schema: "DEBUG"
