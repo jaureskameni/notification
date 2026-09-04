@@ -1,0 +1,185 @@
+---
+openapi: "3.0.3"
+info:
+  title: "Notification REST API"
+  description: "API used by an authenticated user to consult and update their notifications."
+  version: "1.0.0"
+paths:
+  /my/notifications:
+    get:
+      tags:
+      - "Notifications"
+      summary: "Get my notifications"
+      operationId: "getMyNotifications"
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: "status"
+        in: "query"
+        required: false
+        schema:
+          $ref: "#/components/schemas/NotificationStatus"
+      - name: "page"
+        in: "query"
+        required: false
+        schema:
+          type: "integer"
+          minimum: "0"
+      - name: "limit"
+        in: "query"
+        required: true
+        description: "represents the number of service Request to fetch per page."
+        schema:
+          type: "integer"
+          minimum: "10"
+      responses:
+        "200":
+          description: "A cursor-paginated notification collection."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificationPage"
+  /my/notifications/count:
+    get:
+      tags:
+      - "Notifications"
+      summary: "Get the number of my unread notifications"
+      operationId: "getMyUnreadNotificationCount"
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: "status"
+        in: "query"
+        required: true
+        schema:
+          $ref: "#/components/schemas/NotificationStatus"
+      responses:
+        "200":
+          description: "Current unread notification count."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificationCount"
+  /my/notifications/{notificationId}/open:
+    post:
+      tags:
+      - "Notifications"
+      summary: "Mark a notification as opened"
+      description: "Idempotent command. Opening an already opened notification succeeds\
+        \ without changing it."
+      operationId: "openMyNotification"
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: "notificationId"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+          format: "uuid"
+      responses:
+        "204":
+          description: "Notification is opened."
+        "404":
+          description: "NOTIFICATION_404_003"
+  /my/notifications/read-all:
+    post:
+      tags:
+      - "Notifications"
+      summary: "Mark all my notifications as read"
+      description: "Idempotent command. Already read or opened notifications are left\
+        \ unchanged."
+      operationId: "markAllMyNotificationsAsRead"
+      security:
+      - bearerAuth: []
+      responses:
+        "204":
+          description: "Notifications were marked as read."
+components:
+  securitySchemes:
+    bearerAuth:
+      type: "http"
+      scheme: "bearer"
+      bearerFormat: "JWT"
+  schemas:
+    Notification:
+      type: "object"
+      required:
+      - "id"
+      - "referenceId"
+      - "actorId"
+      - "notificationType"
+      - "referenceType"
+      - "referenceId"
+      - "status"
+      - "createdAt"
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        referenceId:
+          type: "string"
+          format: "uuid"
+        actorId:
+          type: "string"
+          format: "uuid"
+          description: "User that triggered the notification."
+        notificationType:
+          $ref: "#/components/schemas/NotificationType"
+        referenceType:
+          $ref: "#/components/schemas/ReferenceType"
+        status:
+          $ref: "#/components/schemas/NotificationStatus"
+        createdAt:
+          type: "string"
+          format: "date-time"
+        readAt:
+          type: "string"
+          format: "date-time"
+        openedAt:
+          type: "string"
+          format: "date-time"
+    NotificationPage:
+      type: "object"
+      required:
+      - "items"
+      - "totalOfElements"
+      properties:
+        items:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Notification"
+        totalOfElements:
+          type: "integer"
+          format: "int64"
+          minimum: 0
+    NotificationCount:
+      type: "object"
+      required:
+      - "numberOfNotification"
+      properties:
+        numberOfNotification:
+          type: "integer"
+          format: "int64"
+          minimum: 0
+    NotificationStatus:
+      type: "string"
+      enum:
+      - "UNREAD"
+      - "READ"
+      - "OPENED"
+    NotificationType:
+      type: "string"
+      enum:
+      - "SERVICE_REQUEST_CREATED"
+      - "SERVICE_REQUEST_ACCEPTED"
+      - "SERVICE_REQUEST_REJECTED"
+      - "SERVICE_REQUEST_CANCELLED"
+      - "SERVICE_PROVIDER_CREATED"
+      - "SERVICE_PROVIDER_APPROVED"
+      - "SERVICE_PROVIDER_REJECTED"
+    ReferenceType:
+      type: "string"
+      enum:
+      - "SERVICE_REQUEST"
+      - "SERVICE_PROVIDER"

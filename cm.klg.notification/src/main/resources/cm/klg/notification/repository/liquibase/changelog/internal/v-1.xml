@@ -6,18 +6,70 @@
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
 
 	<changeSet id="NOTIF-1:1" author="kameni.nguematcha">
-		<createTable tableName="t_inbox_event">
+		<createTable tableName="t_user">
 			<column name="c_id" type="varchar(36)">
 				<constraints nullable="false" primaryKey="true"
-					primaryKeyName="pk_inbox_event" />
+					primaryKeyName="pk_user" />
 			</column>
-			<column name="c_type" type="varchar(30)" />
-			<column name="c_topic" type="varchar(20)" />
-			<column name="c_key" type="varchar(36)" />
-			<column name="c_data" type="text" />
-			<column name="c_status" type="varchar(15)" />
-			<column name="c_created_at" type="timestamp" />
-			<column name="c_processed_at" type="timestamp" />
+			<column name="c_identity_id" type="varchar(36)">
+				<constraints nullable="false" unique="true"
+					uniqueConstraintName="uk_user_identity_id" />
+			</column>
+			<column name="c_firstname" type="varchar(50)" />
+			<column name="c_lastname" type="varchar(50)">
+				<constraints nullable="false" />
+			</column>
+			<column name="c_email" type="varchar(100)" />
+			<column name="c_phone_number" type="varchar(30)" />
+			<column name="c_created_at" type="timestamp">
+				<constraints nullable="false" />
+			</column>
 		</createTable>
+	</changeSet>
+
+	<changeSet id="NOTIF-1:2" author="kameni.nguematcha">
+		<createTable tableName="t_notification">
+			<column name="c_id" type="varchar(36)">
+				<constraints nullable="false" primaryKey="true"
+					primaryKeyName="pk_notification" />
+			</column>
+			<column name="c_recipient_id" type="varchar(36)" />
+			<column name="c_actor_id" type="varchar(36)">
+				<constraints nullable="false" />
+			</column>
+			<column name="c_title" type="varchar(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="c_content" type="text">
+				<constraints nullable="false" />
+			</column>
+			<column name="c_notification_type" type="varchar(50)">
+				<constraints nullable="false" />
+			</column>
+			<column name="c_reference_type" type="varchar(30)">
+				<constraints nullable="false" />
+			</column>
+			<column name="c_reference_id" type="varchar(36)">
+				<constraints nullable="false" />
+			</column>
+			<column name="c_status" type="varchar(10)">
+				<constraints nullable="false" />
+			</column>
+			<column name="c_created_at" type="timestamp">
+				<constraints nullable="false" />
+			</column>
+			<column name="c_read_at" type="timestamp" />
+			<column name="c_opened_at" type="timestamp" />
+		</createTable>
+
+		<addForeignKeyConstraint
+			baseTableName="t_notification" baseColumnNames="c_recipient_id"
+			constraintName="fk_notification_recipient"
+			referencedTableName="t_user" referencedColumnNames="c_identity_id" />
+
+		<addForeignKeyConstraint
+			baseTableName="t_notification" baseColumnNames="c_actor_id"
+			constraintName="fk_notification_actor" referencedTableName="t_user"
+			referencedColumnNames="c_identity_id" />
 	</changeSet>
 </databaseChangeLog>

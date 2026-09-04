@@ -1,3 +1,4 @@
+import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
 
 plugins {
     java
@@ -75,7 +76,6 @@ val applySpringBootOpenApi: ((Any) -> Unit) by extra
 val deleteBeforeGenerate: ((Task, String) -> Unit) by extra
 val onlyIfStale: ((Any, String) -> Unit) by extra
 
-/*
 val mainOpenApiGenerate by tasks.registering(GenerateTask::class) {
     applySpringBootOpenApi(this)
     inputSpec.set("$rootDir/specs/openapi/inbound/main.yml")
@@ -88,7 +88,7 @@ val mainOpenApiGenerate by tasks.registering(GenerateTask::class) {
     deleteBeforeGenerate(this, genDir)
 }
 
-val mainDomainEventsOpenApiGenerate by tasks.registering(GenerateTask::class) {
+/*val mainDomainEventsOpenApiGenerate by tasks.registering(GenerateTask::class) {
     applySpringBootOpenApi(this)
     inputSpec.set("$rootDir/specs/openapi/outbound/domain-event.yml")
     templateDir.set("$rootDir/specs/openapi/templates/spring-boot")
@@ -96,7 +96,7 @@ val mainDomainEventsOpenApiGenerate by tasks.registering(GenerateTask::class) {
 
     val genDir = "${outputDir.get()}/src/main/java/cm/klg/generated/notifications/adapter/messaging/outbound"
     deleteBeforeGenerate(this, genDir)
-}
+}*/
 
 val uamDomainEventsOpenApiGenerate by tasks.registering(GenerateTask::class) {
     applySpringBootOpenApi(this)
@@ -122,9 +122,7 @@ val serviceProviderDomainEventsOpenApiGenerate by tasks.registering(GenerateTask
 tasks.compileJava {
     dependsOn(
         mainOpenApiGenerate,
-        mainDomainEventsOpenApiGenerate,
         uamDomainEventsOpenApiGenerate,
         serviceProviderDomainEventsOpenApiGenerate,
     )
 }
-*/
