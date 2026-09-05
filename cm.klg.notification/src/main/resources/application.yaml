@@ -31,9 +31,6 @@ spring:
       definition: "user; serviceProvider"
     stream:
       bindings:
-        serviceRequest-out-0:
-          group: "${spring.application.name}"
-          destination: "serviceRequest"
         serviceProvider-in-0:
           group: "${spring.application.name}"
           destination: "serviceProvider"
@@ -44,7 +41,7 @@ spring:
         binder:
           brokers: "${KAFKA_URL}"
           auto-add-partitions: true
-      output-bindings: "serviceRequest"
+      output-bindings: "notification"
 jk-dev:
   events-messaging:
     inbox:

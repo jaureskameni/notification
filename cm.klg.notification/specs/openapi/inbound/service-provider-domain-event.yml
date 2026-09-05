@@ -1,0 +1,173 @@
+---
+openapi: "3.0.3"
+info:
+  title: "SERVICE-PROVIDER-EVENT"
+  description: "Service provider domain event"
+  version: "2026-W17"
+servers:
+- url: "https"
+- url: "http"
+paths: {}
+components:
+  schemas:
+    DomainEventType:
+      type: "string"
+      enum:
+      - "SERVICE_PROVIDER_APPROVED"
+      - "SERVICE_PROVIDER_CREATED"
+      - "SERVICE_PROVIDER_REJECTED"
+      - "SERVICE_PROVIDER_SERVICE_ADDED"
+      - "SERVICE_PROVIDER_PORTFOLIO_ITEM_ADDED"
+      - "SERVICE_PROVIDER_PORTFOLIO_ITEM_UPDATED"
+      - "SERVICE_PROVIDER_PORTFOLIO_ITEM_DELETED"
+      - "SERVICE_PROVIDER_PROFILE_UPDATED"
+    ServiceProviderCreatedEventDTO:
+      type: "object"
+      required:
+      - "serviceProviderId"
+      - "userId"
+      - "createdAt"
+      properties:
+        serviceProviderId:
+          type: "string"
+          format: "uuid"
+        userId:
+          type: "string"
+          format: "uuid"
+        createdAt:
+          type: "string"
+          format: "date-time"
+    ServiceProviderRejectedEventDTO:
+      type: "object"
+      required:
+      - "serviceProviderId"
+      - "userId"
+      - "rejectedBy"
+      - "rejectedAt"
+      properties:
+        serviceProviderId:
+          type: "string"
+          format: "uuid"
+        userId:
+          type: "string"
+          format: "uuid"
+        rejectedBy:
+          type: "string"
+          format: "uuid"
+        reason:
+          type: "string"
+        rejectedAt:
+          type: "string"
+          format: "date-time"
+    ServiceProviderApprovedEventDTO:
+      type: "object"
+      required:
+      - "serviceProviderId"
+      - "userId"
+      - "approvedBy"
+      - "approvedAt"
+      properties:
+        serviceProviderId:
+          type: "string"
+          format: "uuid"
+        userId:
+          type: "string"
+          format: "uuid"
+        approvedBy:
+          type: "string"
+          format: "uuid"
+        approvedAt:
+          type: "string"
+          format: "date-time"
+    ServiceProviderServiceAddedEventDTO:
+      type: "object"
+      properties:
+        serviceProviderId:
+          type: "string"
+          format: "uuid"
+        userId:
+          type: "string"
+          format: "uuid"
+        serviceTypeId:
+          type: "string"
+          format: "uuid"
+        yearOfExperience:
+          type: "integer"
+        documentId:
+          type: "string"
+          format: "uuid"
+        addedAt:
+          type: "string"
+          format: "date-time"
+    ServiceProviderPortfolioItemAddedEventDTO:
+      type: "object"
+      properties:
+        serviceProviderId:
+          type: "string"
+          format: "uuid"
+        userId:
+          type: "string"
+          format: "uuid"
+        portfolioItemId:
+          type: "string"
+          format: "uuid"
+    ServiceProviderPortfolioItemUpdatedEventDTO:
+      type: "object"
+      properties:
+        serviceProviderId:
+          type: "string"
+          format: "uuid"
+        userId:
+          type: "string"
+          format: "uuid"
+        portfolioItemId:
+          type: "string"
+          format: "uuid"
+    ServiceProviderPortfolioItemDeletedEventDTO:
+      type: "object"
+      properties:
+        serviceProviderId:
+          type: "string"
+          format: "uuid"
+        userId:
+          type: "string"
+          format: "uuid"
+        portfolioItemId:
+          type: "string"
+          format: "uuid"
+    ServiceProviderProfileUpdatedEventDTO:
+      type: "object"
+      properties:
+        serviceProviderId:
+          type: "string"
+          format: "uuid"
+        userId:
+          type: "string"
+          format: "uuid"
+        cityId:
+          type: "string"
+          format: "uuid"
+        districtId:
+          type: "string"
+          format: "uuid"
+        quarterId:
+          type: "string"
+          format: "uuid"
+        phoneNumber:
+          $ref: "#/components/schemas/PhoneNumberDTO"
+        about:
+          type: "string"
+        updatedAt:
+          type: "string"
+          format: "date-time"
+    PhoneNumberDTO:
+      type: "object"
+      properties:
+        countryCode:
+          type: "string"
+          description: "the international code for the country"
+          example: "237 for Cameroon"
+        number:
+          type: "string"
+          description: "the phone number"
+          example: "653492410"
