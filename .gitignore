@@ -10,4 +10,9 @@ lib/
 gradle.prefs
 **/*.log
 .pgpass
+**/GRADLE_GUIDE_DEBUTANT.html
+**/GRADLE_GUIDE_DEBUTANT.pdf
+**/GRADLE_GUIDE_DEBUTANT.txt
+**/GUIDE_JAVA_SPRINGBOOT_COMPLET.html
+**/GUIDE_JAVA_SPRINGBOOT_COMPLET.pdf
 **/application-local.yml
