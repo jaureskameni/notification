@@ -72,4 +72,26 @@
 			constraintName="fk_notification_actor" referencedTableName="t_user"
 			referencedColumnNames="c_identity_id" />
 	</changeSet>
+
+	<changeSet id="NOTIF-2:1" author="kameni.nguematcha">
+		<dropForeignKeyConstraint
+			baseTableName="t_notification"
+			constraintName="fk_notification_recipient" />
+
+		<dropForeignKeyConstraint
+			baseTableName="t_notification" constraintName="fk_notification_actor" />
+
+		<dropColumn tableName="t_user" columnName="c_identity_id" />
+
+		<addForeignKeyConstraint
+			baseTableName="t_notification" baseColumnNames="c_recipient_id"
+			constraintName="fk_notification_recipient_v2"
+			referencedTableName="t_user" referencedColumnNames="c_id" />
+
+		<addForeignKeyConstraint
+			baseTableName="t_notification" baseColumnNames="c_actor_id"
+			constraintName="fk_notification_actor_v2"
+			referencedTableName="t_user" referencedColumnNames="c_id" />
+	</changeSet>
+
 </databaseChangeLog>

@@ -30,13 +30,11 @@ class MessagingInboundMapperTest {
   @Test
   void shouldMapToCreateUserCommandTest() {
     var userId = UUID.randomUUID();
-    var identityId = UUID.randomUUID();
     var createdAt = LocalDateTime.now();
 
     var event =
         new UamUserCreatedEventDTO()
-            .id(userId)
-            .identityId(identityId)
+            .userId(userId)
             .firstname("John")
             .lastname("Doe")
             .email("john.doe@example.com")
@@ -48,10 +46,9 @@ class MessagingInboundMapperTest {
     assertThat(command)
         .extracting(
             CreateNewUserUseCase.CreateNewUserCommand::id,
-            CreateNewUserUseCase.CreateNewUserCommand::identityId,
             CreateNewUserUseCase.CreateNewUserCommand::countryCode,
             CreateNewUserUseCase.CreateNewUserCommand::phoneNumber)
-        .containsExactly(userId, identityId, "+237", "699999999");
+        .containsExactly(userId, "+237", "699999999");
     assertThat(command.profile())
         .extracting(
             CreateNewUserUseCase.CreateNewUserCommand.UserProfileCommand::firstname,
@@ -122,12 +119,10 @@ class MessagingInboundMapperTest {
   @Test
   void shouldMapToCreateUserCommandWithNullEmailTest() {
     var userId = UUID.randomUUID();
-    var identityId = UUID.randomUUID();
 
     var event =
         new UamUserCreatedEventDTO()
-            .id(userId)
-            .identityId(identityId)
+            .userId(userId)
             .firstname("Jane")
             .lastname("Smith")
             .email(null)

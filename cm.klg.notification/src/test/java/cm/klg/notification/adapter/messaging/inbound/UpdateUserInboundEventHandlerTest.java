@@ -13,9 +13,9 @@ import static org.mockito.Mockito.when;
 import cm.klg.common.base.transaction.UseCaseExecutor;
 import cm.klg.generated.uam.adapter.messaging.inbound.dto.UamDomainEventType;
 import cm.klg.generated.uam.adapter.messaging.inbound.dto.UamPhoneNumberDTO;
-import cm.klg.generated.uam.adapter.messaging.inbound.dto.UamUserCreatedEventDTO;
+import cm.klg.generated.uam.adapter.messaging.inbound.dto.UamUserUpdatedEventDTO;
 import cm.klg.notification.application.outbound.UserRepository;
-import cm.klg.notification.application.usecase.CreateNewUserUseCase;
+import cm.klg.notification.application.usecase.UpdateUserUseCase;
 import cm.klg.notification.domaine.user.User;
 import com.emb.domain.inboxevent.InboxEventCommand;
 import java.time.LocalDateTime;
@@ -28,45 +28,44 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class CreateUserInboundEventHandlerTest {
+class UpdateUserInboundEventHandlerTest {
 
-  @Mock private CreateNewUserUseCase createNewUserUseCase;
+  @Mock private UpdateUserUseCase updateUserUseCase;
   @Mock private MessagingInboundMapper messagingInboundMapper;
   @Mock private UseCaseExecutor useCaseExecutor;
 
-  @InjectMocks private CreateUserInboundEventHandler handler;
+  @InjectMocks private UpdateUserInboundEventHandler handler;
 
   @Test
-  void shouldExposeUserCreatedEventTypeTest() {
-    assertThat(handler.getEventType()).isEqualTo(UamDomainEventType.USER_CREATED.getValue());
+  void shouldExposeUserUpdatedEventTypeTest() {
+    assertThat(handler.getEventType()).isEqualTo(UamDomainEventType.USER_UPDATED.getValue());
   }
 
   @Test
-  void shouldExposeUamUserCreatedEventDataTypeTest() {
-    assertThat(handler.getDataType()).isEqualTo(UamUserCreatedEventDTO.class);
+  void shouldExposeUamUserUpdatedEventDataTypeTest() {
+    assertThat(handler.getDataType()).isEqualTo(UamUserUpdatedEventDTO.class);
   }
 
   @Test
   void shouldNotExecuteCommandWhenExecutorDoesNotRunItTest() {
-    UamUserCreatedEventDTO event = givenUserCreatedEvent();
+    UamUserUpdatedEventDTO event = givenUserUpdatedEvent();
     InboxEventCommand inboxEventCommand = givenInboxEventCommand(event);
 
     handler.handle(event, inboxEventCommand);
 
-    verify(messagingInboundMapper, never()).toCreateUserCommand(event);
-    verify(createNewUserUseCase, never())
-        .execute(any(CreateNewUserUseCase.CreateNewUserCommand.class));
+    verify(messagingInboundMapper, never()).toUpdateUserCommand(event);
+    verify(updateUserUseCase, never()).execute(any(UpdateUserUseCase.UpdateUserCommand.class));
     verify(useCaseExecutor).runCommand(any(Runnable.class));
   }
 
   @Test
   void shouldPropagateExceptionRaisedByUseCaseTest() {
-    UamUserCreatedEventDTO event = givenUserCreatedEvent();
+    UamUserUpdatedEventDTO event = givenUserUpdatedEvent();
     InboxEventCommand inboxEventCommand = givenInboxEventCommand(event);
-    CreateNewUserUseCase.CreateNewUserCommand command = givenCreateUserCommand();
+    UpdateUserUseCase.UpdateUserCommand command = givenUpdateUserCommand();
 
-    when(messagingInboundMapper.toCreateUserCommand(event)).thenReturn(command);
-    doThrow(new IllegalStateException("boom")).when(createNewUserUseCase).execute(command);
+    when(messagingInboundMapper.toUpdateUserCommand(event)).thenReturn(command);
+    doThrow(new IllegalStateException("boom")).when(updateUserUseCase).execute(command);
     runCommandWhenExecuted(useCaseExecutor);
 
     assertThatThrownBy(() -> handler.handle(event, inboxEventCommand))
@@ -75,23 +74,23 @@ class CreateUserInboundEventHandlerTest {
   }
 
   @Test
-  void shouldCreateUserFromEventDataThroughFullFlowTest() {
+  void shouldUpdateUserFromEventDataThroughFullFlowTest() {
     UUID userId = UUID.randomUUID();
-    LocalDateTime createdAt = LocalDateTime.now().minusMinutes(10);
-    UamUserCreatedEventDTO event =
-        new UamUserCreatedEventDTO()
+    LocalDateTime updatedAt = LocalDateTime.now().minusMinutes(10);
+    UamUserUpdatedEventDTO event =
+        new UamUserUpdatedEventDTO()
             .userId(userId)
             .lastname("Doe")
             .firstname(" John ")
             .email("john.doe@example.com")
             .phoneNumber(new UamPhoneNumberDTO().countryCode("+237").number("699999999"))
-            .createdAt(createdAt);
+            .updatedAt(updatedAt);
     InboxEventCommand inboxEventCommand = givenInboxEventCommand(event);
 
     UserRepository userRepository = mock(UserRepository.class);
-    CreateUserInboundEventHandler realFlowHandler =
-        new CreateUserInboundEventHandler(
-            new CreateNewUserUseCase(userRepository),
+    UpdateUserInboundEventHandler realFlowHandler =
+        new UpdateUserInboundEventHandler(
+            new UpdateUserUseCase(userRepository),
             new MessagingInboundMapperImpl(),
             useCaseExecutor);
     runCommandWhenExecuted(useCaseExecutor);
@@ -99,7 +98,7 @@ class CreateUserInboundEventHandlerTest {
     realFlowHandler.handle(event, inboxEventCommand);
 
     ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
-    verify(userRepository).insertIfAbsent(userCaptor.capture());
+    verify(userRepository).update(userCaptor.capture());
 
     assertThat(userCaptor.getValue())
         .satisfies(
@@ -112,34 +111,34 @@ class CreateUserInboundEventHandlerTest {
               assertThat(user.getEmail().value()).isEqualTo("john.doe@example.com");
               assertThat(user.getPhoneNumber().countryCode()).isEqualTo("+237");
               assertThat(user.getPhoneNumber().number()).isEqualTo("699999999");
-              assertThat(user.getCreatedAt().value()).isEqualTo(createdAt);
+              assertThat(user.getCreatedAt().value()).isEqualTo(updatedAt);
             });
     verify(useCaseExecutor).runCommand(any(Runnable.class));
   }
 
-  private static UamUserCreatedEventDTO givenUserCreatedEvent() {
-    return new UamUserCreatedEventDTO()
+  private static UamUserUpdatedEventDTO givenUserUpdatedEvent() {
+    return new UamUserUpdatedEventDTO()
         .userId(UUID.randomUUID())
         .lastname("Doe")
         .firstname(" John ")
         .email("john.doe@example.com")
         .phoneNumber(new UamPhoneNumberDTO().countryCode("+237").number("699999999"))
-        .createdAt(LocalDateTime.now().minusMinutes(10));
+        .updatedAt(LocalDateTime.now().minusMinutes(10));
   }
 
-  private static InboxEventCommand givenInboxEventCommand(UamUserCreatedEventDTO event) {
+  private static InboxEventCommand givenInboxEventCommand(UamUserUpdatedEventDTO event) {
     return new InboxEventCommand(
         UUID.randomUUID(),
         "user",
-        UamDomainEventType.USER_CREATED.getValue(),
+        UamDomainEventType.USER_UPDATED.getValue(),
         String.valueOf(event.getUserId()),
         event);
   }
 
-  private static CreateNewUserUseCase.CreateNewUserCommand givenCreateUserCommand() {
-    return new CreateNewUserUseCase.CreateNewUserCommand(
+  private static UpdateUserUseCase.UpdateUserCommand givenUpdateUserCommand() {
+    return new UpdateUserUseCase.UpdateUserCommand(
         UUID.randomUUID(),
-        new CreateNewUserUseCase.CreateNewUserCommand.UserProfileCommand(
+        new UpdateUserUseCase.UpdateUserCommand.UserProfileCommand(
             "Doe", " John ", "john.doe@example.com"),
         "+237",
         "699999999",

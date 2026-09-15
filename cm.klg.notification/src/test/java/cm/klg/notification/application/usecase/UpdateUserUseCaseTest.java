@@ -1,9 +1,7 @@
 package cm.klg.notification.application.usecase;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 
 import cm.klg.notification.application.outbound.UserRepository;
 import cm.klg.notification.domaine.user.User;
@@ -17,29 +15,29 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class CreateNewUserUseCaseTest {
+class UpdateUserUseCaseTest {
 
   @Mock private UserRepository userRepository;
 
-  @InjectMocks private CreateNewUserUseCase createNewUserUseCase;
+  @InjectMocks private UpdateUserUseCase updateUserUseCase;
 
   @Test
-  void shouldCreateNewUserTest() {
+  void shouldUpdateUserTest() {
     UUID userId = UUID.randomUUID();
     LocalDateTime now = LocalDateTime.now().minusMinutes(5);
-    CreateNewUserUseCase.CreateNewUserCommand command =
-        new CreateNewUserUseCase.CreateNewUserCommand(
+    UpdateUserUseCase.UpdateUserCommand command =
+        new UpdateUserUseCase.UpdateUserCommand(
             userId,
-            new CreateNewUserUseCase.CreateNewUserCommand.UserProfileCommand(
+            new UpdateUserUseCase.UpdateUserCommand.UserProfileCommand(
                 "Doe", " John ", "john.doe@example.com"),
             "+237",
             "699999999",
             now);
 
-    createNewUserUseCase.execute(command);
+    updateUserUseCase.execute(command);
 
     ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
-    verify(userRepository).insertIfAbsent(userCaptor.capture());
+    verify(userRepository).update(userCaptor.capture());
 
     assertThat(userCaptor.getValue())
         .satisfies(
@@ -57,59 +55,25 @@ class CreateNewUserUseCaseTest {
   }
 
   @Test
-  void shouldCreateUserWithNullableFirstnameTest() {
+  void shouldUpdateUserWithNullableFieldsTest() {
     UUID userId = UUID.randomUUID();
     LocalDateTime now = LocalDateTime.now().minusMinutes(5);
-    CreateNewUserUseCase.CreateNewUserCommand command =
-        new CreateNewUserUseCase.CreateNewUserCommand(
+    UpdateUserUseCase.UpdateUserCommand command =
+        new UpdateUserUseCase.UpdateUserCommand(
             userId,
-            new CreateNewUserUseCase.CreateNewUserCommand.UserProfileCommand("Doe", null, null),
+            new UpdateUserUseCase.UpdateUserCommand.UserProfileCommand("Doe", null, null),
             "+237",
             "699999999",
             now);
 
-    createNewUserUseCase.execute(command);
+    updateUserUseCase.execute(command);
 
     ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
-    verify(userRepository).insertIfAbsent(userCaptor.capture());
+    verify(userRepository).update(userCaptor.capture());
 
     assertThat(userCaptor.getValue().getFirstname()).isNull();
     assertThat(userCaptor.getValue().getEmail()).isNull();
     assertThat(userCaptor.getValue().getLastname().value()).isEqualTo("Doe");
     assertThat(userCaptor.getValue().getPhoneNumber().value()).isEqualTo("+237699999999");
-  }
-
-  @Test
-  void shouldRejectBlankFirstnameTest() {
-    CreateNewUserUseCase.CreateNewUserCommand command =
-        new CreateNewUserUseCase.CreateNewUserCommand(
-            UUID.randomUUID(),
-            new CreateNewUserUseCase.CreateNewUserCommand.UserProfileCommand(
-                "Doe", " ", "john.doe@example.com"),
-            "+237",
-            "699999999",
-            LocalDateTime.now().minusMinutes(5));
-
-    assertThatThrownBy(() -> createNewUserUseCase.execute(command))
-        .isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("Firstname cannot be blank");
-    verifyNoInteractions(userRepository);
-  }
-
-  @Test
-  void shouldRejectFutureCreatedAtTest() {
-    CreateNewUserUseCase.CreateNewUserCommand command =
-        new CreateNewUserUseCase.CreateNewUserCommand(
-            UUID.randomUUID(),
-            new CreateNewUserUseCase.CreateNewUserCommand.UserProfileCommand(
-                "Doe", "John", "john.doe@example.com"),
-            "+237",
-            "699999999",
-            LocalDateTime.now().plusMinutes(5));
-
-    assertThatThrownBy(() -> createNewUserUseCase.execute(command))
-        .isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("The given timestamp is already in the future");
-    verifyNoInteractions(userRepository);
   }
 }

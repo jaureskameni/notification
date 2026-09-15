@@ -28,12 +28,15 @@ spring:
     enabled: true
   cloud:
     function:
-      definition: "user; serviceProvider"
+      definition: "user;serviceProvider;serviceRequest"
     stream:
       bindings:
         serviceProvider-in-0:
           group: "${spring.application.name}"
           destination: "serviceProvider"
+        serviceRequest-in-0:
+          group: "${spring.application.name}"
+          destination: "serviceRequest"
         user-in-0:
           group: "${spring.application.name}"
           destination: "user"

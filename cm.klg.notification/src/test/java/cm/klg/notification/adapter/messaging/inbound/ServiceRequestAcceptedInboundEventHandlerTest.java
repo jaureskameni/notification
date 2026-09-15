@@ -1,0 +1,92 @@
+package cm.klg.notification.adapter.messaging.inbound;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+
+import cm.klg.common.base.transaction.UseCaseExecutor;
+import cm.klg.notification.application.usecase.CreateNotificationUseCase;
+import com.emb.domain.inboxevent.InboxEventCommand;
+import java.util.UUID;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.openapitools.model.ServiceRequestDomainEventType;
+import org.openapitools.model.ServiceRequestServiceRequestAcceptedEventDTO;
+
+@ExtendWith(MockitoExtension.class)
+class ServiceRequestAcceptedInboundEventHandlerTest {
+
+  @Mock private CreateNotificationUseCase createNotificationUseCase;
+  @Mock private UseCaseExecutor useCaseExecutor;
+  @Mock private MessagingInboundMapper messagingInboundMapper;
+
+  @InjectMocks private ServiceRequestAcceptedInboundEventHandler handler;
+
+  @Test
+  void shouldExposeServiceRequestAcceptedEventTypeTest() {
+    assertThat(handler.getEventType())
+        .isEqualTo(ServiceRequestDomainEventType.SERVICE_REQUEST_ACCEPTED.getValue());
+  }
+
+  @Test
+  void shouldExposeServiceRequestAcceptedEventDTODataTypeTest() {
+    assertThat(handler.getDataType()).isEqualTo(ServiceRequestServiceRequestAcceptedEventDTO.class);
+  }
+
+  @Test
+  void shouldHandleServiceRequestAcceptedEventTest() {
+    ServiceRequestServiceRequestAcceptedEventDTO event =
+        new ServiceRequestServiceRequestAcceptedEventDTO();
+    event.setId(UUID.randomUUID());
+    event.setUserId(UUID.randomUUID());
+    event.setProviderId(UUID.randomUUID());
+    InboxEventCommand inboxEventCommand = givenInboxEventCommand(event);
+
+    doAnswer(
+            invocation -> {
+              invocation.getArgument(0, Runnable.class).run();
+              return null;
+            })
+        .when(useCaseExecutor)
+        .runCommand(any());
+
+    handler.handle(event, inboxEventCommand);
+
+    verify(useCaseExecutor).runCommand(any());
+  }
+
+  @Test
+  void shouldThrowExceptionWhenHandlingFailsTest() {
+    ServiceRequestServiceRequestAcceptedEventDTO event =
+        new ServiceRequestServiceRequestAcceptedEventDTO();
+    event.setId(UUID.randomUUID());
+    event.setUserId(UUID.randomUUID());
+    event.setProviderId(UUID.randomUUID());
+    InboxEventCommand inboxEventCommand = givenInboxEventCommand(event);
+
+    doThrow(new RuntimeException("Error")).when(useCaseExecutor).runCommand(any());
+
+    try {
+      handler.handle(event, inboxEventCommand);
+    } catch (RuntimeException e) {
+      assertThat(e.getMessage()).isEqualTo("Error");
+    }
+
+    verify(useCaseExecutor).runCommand(any());
+  }
+
+  private static InboxEventCommand givenInboxEventCommand(
+      ServiceRequestServiceRequestAcceptedEventDTO event) {
+    return new InboxEventCommand(
+        UUID.randomUUID(),
+        "service-request",
+        ServiceRequestDomainEventType.SERVICE_REQUEST_ACCEPTED.getValue(),
+        String.valueOf(event.getId()),
+        event);
+  }
+}

@@ -15,29 +15,29 @@ import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.Nullable;
 
 @RequiredArgsConstructor
-public class CreateNewUserUseCase {
+public class UpdateUserUseCase {
   private final UserRepository userRepository;
 
-  public void execute(CreateNewUserCommand command) {
+  public void execute(UpdateUserCommand command) {
     Firstname firstname = Firstname.from(command.profile().firstname());
     Email email = Email.from(command.profile().email());
     PhoneNumber phoneNumber = new PhoneNumber(command.countryCode(), command.phoneNumber());
     Lastname lastname = Lastname.from(command.profile().lastname());
 
     UserProfile userProfile = new UserProfile(firstname, lastname, phoneNumber, email);
-    User newUser =
+    User updatedUser =
         User.reconstitute(
-            UserId.from(command.id()), userProfile, CreatedAt.from(command.createdAt));
+            UserId.from(command.id()), userProfile, CreatedAt.from(command.updatedAt));
 
-    userRepository.insertIfAbsent(newUser);
+    userRepository.update(updatedUser);
   }
 
-  public record CreateNewUserCommand(
+  public record UpdateUserCommand(
       UUID id,
       UserProfileCommand profile,
       String countryCode,
       String phoneNumber,
-      LocalDateTime createdAt) {
+      LocalDateTime updatedAt) {
     public record UserProfileCommand(
         String lastname, @Nullable String firstname, @Nullable String email) {}
   }

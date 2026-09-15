@@ -7,10 +7,12 @@ import cm.klg.notification.application.outbound.NotificationRepository;
 import cm.klg.notification.application.outbound.UserRepository;
 import cm.klg.notification.application.usecase.CreateNewUserUseCase;
 import cm.klg.notification.application.usecase.CreateNotificationUseCase;
+import cm.klg.notification.application.usecase.DeleteUserUseCase;
 import cm.klg.notification.application.usecase.GetMyNotificationsUseCase;
 import cm.klg.notification.application.usecase.GetMyUnreadNotificationCountUseCase;
 import cm.klg.notification.application.usecase.MarkAllMyNotificationsAsReadUseCase;
 import cm.klg.notification.application.usecase.OpenMyNotificationUseCase;
+import cm.klg.notification.application.usecase.UpdateUserUseCase;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
@@ -31,6 +33,16 @@ public class NotificationBeans implements TransactionBeansProvider {
   @Bean
   public CreateNewUserUseCase createNewUserUseCase(UserRepository userRepository) {
     return new CreateNewUserUseCase(userRepository);
+  }
+
+  @Bean
+  public UpdateUserUseCase updateUserUseCase(UserRepository userRepository) {
+    return new UpdateUserUseCase(userRepository);
+  }
+
+  @Bean
+  public DeleteUserUseCase deleteUserUseCase(UserRepository userRepository) {
+    return new DeleteUserUseCase(userRepository);
   }
 
   @Bean

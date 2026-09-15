@@ -12,13 +12,11 @@ class UserJpaTest {
   @Test
   void shouldCreateWithAllFields() {
     var userId = UUID.randomUUID();
-    var identityId = UUID.randomUUID();
     var phone = new PhoneNumberJpa("+237", "699999999");
     var createdAt = LocalDateTime.now();
 
     var user = new UserJpa();
     user.setId(userId);
-    user.setIdentityId(identityId);
     user.setFirstname("John");
     user.setLastname("Doe");
     user.setEmail("john@example.com");
