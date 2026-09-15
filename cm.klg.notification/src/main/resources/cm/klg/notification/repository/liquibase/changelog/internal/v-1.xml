@@ -73,7 +73,7 @@
 			referencedColumnNames="c_identity_id" />
 	</changeSet>
 
-	<changeSet id="NOTIF-2:1" author="kameni.nguematcha">
+	<changeSet id="NOTIF-4:1" author="kameni.nguematcha">
 		<dropForeignKeyConstraint
 			baseTableName="t_notification"
 			constraintName="fk_notification_recipient" />
