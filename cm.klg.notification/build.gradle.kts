@@ -119,10 +119,21 @@ val serviceProviderDomainEventsOpenApiGenerate by tasks.registering(GenerateTask
     deleteBeforeGenerate(this, genDir)
 }
 
+val serviceRequestDomainEventsOpenApiGenerate by tasks.registering(GenerateTask::class) {
+    applySpringBootOpenApi(this)
+    inputSpec.set("$rootDir/specs/openapi/inbound/service-request-domain-event.yml")
+    templateDir.set("$rootDir/specs/openapi/templates/spring-boot")
+    modelNamePrefix.set("ServiceRequest")
+
+    val genDir = "${outputDir.get()}/src/main/java/cm/klg/generated/service_request/adapter/messaging/inbound"
+    deleteBeforeGenerate(this, genDir)
+}
+
 tasks.compileJava {
     dependsOn(
         mainOpenApiGenerate,
         uamDomainEventsOpenApiGenerate,
         serviceProviderDomainEventsOpenApiGenerate,
+        serviceRequestDomainEventsOpenApiGenerate,
     )
 }

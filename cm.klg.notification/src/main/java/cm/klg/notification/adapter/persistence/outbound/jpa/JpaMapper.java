@@ -10,7 +10,6 @@ import cm.klg.notification.domaine.notification.NotificationType;
 import cm.klg.notification.domaine.notification.ReferenceType;
 import cm.klg.notification.domaine.user.Email;
 import cm.klg.notification.domaine.user.Firstname;
-import cm.klg.notification.domaine.user.IdentityId;
 import cm.klg.notification.domaine.user.Lastname;
 import cm.klg.notification.domaine.user.PhoneNumber;
 import cm.klg.notification.domaine.user.User;
@@ -31,7 +30,6 @@ interface JpaMapper {
 
   @BeanMapping(ignoreByDefault = true)
   @Mapping(target = "id", source = "id.value")
-  @Mapping(target = "identityId", source = "identityId.value")
   @Mapping(target = "lastname", source = "lastname.value")
   @Mapping(target = "firstname", source = "firstname.value")
   @Mapping(target = "email", source = "email.value")
@@ -51,10 +49,7 @@ interface JpaMapper {
             phoneNumber,
             Email.from(userJpa.getEmail()));
     return User.reconstitute(
-        UserId.from(userJpa.getId()),
-        IdentityId.from(userJpa.getIdentityId()),
-        userProfile,
-        CreatedAt.from(userJpa.getCreatedAt()));
+        UserId.from(userJpa.getId()), userProfile, CreatedAt.from(userJpa.getCreatedAt()));
   }
 
   @BeanMapping(ignoreByDefault = true)
