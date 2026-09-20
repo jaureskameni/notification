@@ -1,11 +1,8 @@
 package cm.klg.notification.adapter.messaging.inbound;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
 
-import cm.klg.common.base.transaction.UseCaseExecutor;
 import cm.klg.notification.application.usecase.CreateNotificationUseCase;
 import cm.klg.notification.domaine.notification.NotificationType;
 import com.emb.domain.inboxevent.InboxEventCommand;
@@ -24,7 +21,6 @@ import org.openapitools.model.ServiceProviderServiceProviderRejectedEventDTO;
 class ServiceProviderNotificationInboundEventHandlerTest {
 
   @Mock private CreateNotificationUseCase createNotificationUseCase;
-  @Mock private UseCaseExecutor useCaseExecutor;
 
   @Test
   void shouldCreateApprovedNotificationTest() {
@@ -39,9 +35,8 @@ class ServiceProviderNotificationInboundEventHandlerTest {
             .approvedBy(actorId)
             .approvedAt(approvedAt);
 
-    runCommandWhenExecuted();
     new ApproveServiceProviderInboundEventHandler(
-            createNotificationUseCase, useCaseExecutor, new MessagingInboundMapperImpl())
+            createNotificationUseCase, new MessagingInboundMapperImpl())
         .handle(event, inboxEvent(event));
 
     assertNotification(
@@ -59,9 +54,8 @@ class ServiceProviderNotificationInboundEventHandlerTest {
             .userId(userId)
             .createdAt(createdAt);
 
-    runCommandWhenExecuted();
     new CreateServiceProviderInboundEventHandler(
-            createNotificationUseCase, useCaseExecutor, new MessagingInboundMapperImpl())
+            createNotificationUseCase, new MessagingInboundMapperImpl())
         .handle(event, inboxEvent(event));
 
     assertNotification(
@@ -82,9 +76,8 @@ class ServiceProviderNotificationInboundEventHandlerTest {
             .reason("Document invalide")
             .rejectedAt(rejectedAt);
 
-    runCommandWhenExecuted();
     new RejectServiceProviderInboundEventHandler(
-            createNotificationUseCase, useCaseExecutor, new MessagingInboundMapperImpl())
+            createNotificationUseCase, new MessagingInboundMapperImpl())
         .handle(event, inboxEvent(event));
 
     assertNotification(
@@ -104,16 +97,6 @@ class ServiceProviderNotificationInboundEventHandlerTest {
               assertThat(command.actorId().value()).isEqualTo(actorId);
               assertThat(command.referenceId().value()).isEqualTo(serviceProviderId);
             });
-  }
-
-  private void runCommandWhenExecuted() {
-    doAnswer(
-            invocation -> {
-              invocation.<Runnable>getArgument(0).run();
-              return null;
-            })
-        .when(useCaseExecutor)
-        .runCommand(any(Runnable.class));
   }
 
   private static InboxEventCommand inboxEvent(Object event) {

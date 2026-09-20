@@ -34,7 +34,7 @@ class MessagingInboundMapperTest {
 
     var event =
         new UamUserCreatedEventDTO()
-            .userId(userId)
+            .id(userId)
             .firstname("John")
             .lastname("Doe")
             .email("john.doe@example.com")
@@ -122,7 +122,7 @@ class MessagingInboundMapperTest {
 
     var event =
         new UamUserCreatedEventDTO()
-            .userId(userId)
+            .id(userId)
             .firstname("Jane")
             .lastname("Smith")
             .email(null)

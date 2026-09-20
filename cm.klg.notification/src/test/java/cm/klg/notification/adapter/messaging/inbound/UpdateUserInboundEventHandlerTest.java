@@ -3,14 +3,11 @@ package cm.klg.notification.adapter.messaging.inbound;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import cm.klg.common.base.transaction.UseCaseExecutor;
 import cm.klg.generated.uam.adapter.messaging.inbound.dto.UamDomainEventType;
 import cm.klg.generated.uam.adapter.messaging.inbound.dto.UamPhoneNumberDTO;
 import cm.klg.generated.uam.adapter.messaging.inbound.dto.UamUserUpdatedEventDTO;
@@ -32,7 +29,6 @@ class UpdateUserInboundEventHandlerTest {
 
   @Mock private UpdateUserUseCase updateUserUseCase;
   @Mock private MessagingInboundMapper messagingInboundMapper;
-  @Mock private UseCaseExecutor useCaseExecutor;
 
   @InjectMocks private UpdateUserInboundEventHandler handler;
 
@@ -47,15 +43,23 @@ class UpdateUserInboundEventHandlerTest {
   }
 
   @Test
-  void shouldNotExecuteCommandWhenExecutorDoesNotRunItTest() {
-    UamUserUpdatedEventDTO event = givenUserUpdatedEvent();
+  void shouldUpdateUserFromEventDataTest() {
+    UUID userId = UUID.randomUUID();
+    LocalDateTime updatedAt = LocalDateTime.now().minusMinutes(10);
+    UamUserUpdatedEventDTO event =
+        new UamUserUpdatedEventDTO()
+            .id(userId)
+            .lastname("Doe")
+            .firstname(" John ")
+            .email("john.doe@example.com")
+            .phoneNumber(new UamPhoneNumberDTO().countryCode("+237").number("699999999"))
+            .updatedAt(updatedAt);
     InboxEventCommand inboxEventCommand = givenInboxEventCommand(event);
 
     handler.handle(event, inboxEventCommand);
 
-    verify(messagingInboundMapper, never()).toUpdateUserCommand(event);
-    verify(updateUserUseCase, never()).execute(any(UpdateUserUseCase.UpdateUserCommand.class));
-    verify(useCaseExecutor).runCommand(any(Runnable.class));
+    verify(messagingInboundMapper).toUpdateUserCommand(event);
+    verify(updateUserUseCase).execute(any());
   }
 
   @Test
@@ -66,7 +70,6 @@ class UpdateUserInboundEventHandlerTest {
 
     when(messagingInboundMapper.toUpdateUserCommand(event)).thenReturn(command);
     doThrow(new IllegalStateException("boom")).when(updateUserUseCase).execute(command);
-    runCommandWhenExecuted(useCaseExecutor);
 
     assertThatThrownBy(() -> handler.handle(event, inboxEventCommand))
         .isInstanceOf(IllegalStateException.class)
@@ -79,7 +82,7 @@ class UpdateUserInboundEventHandlerTest {
     LocalDateTime updatedAt = LocalDateTime.now().minusMinutes(10);
     UamUserUpdatedEventDTO event =
         new UamUserUpdatedEventDTO()
-            .userId(userId)
+            .id(userId)
             .lastname("Doe")
             .firstname(" John ")
             .email("john.doe@example.com")
@@ -90,10 +93,7 @@ class UpdateUserInboundEventHandlerTest {
     UserRepository userRepository = mock(UserRepository.class);
     UpdateUserInboundEventHandler realFlowHandler =
         new UpdateUserInboundEventHandler(
-            new UpdateUserUseCase(userRepository),
-            new MessagingInboundMapperImpl(),
-            useCaseExecutor);
-    runCommandWhenExecuted(useCaseExecutor);
+            new UpdateUserUseCase(userRepository), new MessagingInboundMapperImpl());
 
     realFlowHandler.handle(event, inboxEventCommand);
 
@@ -113,12 +113,11 @@ class UpdateUserInboundEventHandlerTest {
               assertThat(user.getPhoneNumber().number()).isEqualTo("699999999");
               assertThat(user.getCreatedAt().value()).isEqualTo(updatedAt);
             });
-    verify(useCaseExecutor).runCommand(any(Runnable.class));
   }
 
   private static UamUserUpdatedEventDTO givenUserUpdatedEvent() {
     return new UamUserUpdatedEventDTO()
-        .userId(UUID.randomUUID())
+        .id(UUID.randomUUID())
         .lastname("Doe")
         .firstname(" John ")
         .email("john.doe@example.com")
@@ -131,7 +130,7 @@ class UpdateUserInboundEventHandlerTest {
         UUID.randomUUID(),
         "user",
         UamDomainEventType.USER_UPDATED.getValue(),
-        String.valueOf(event.getUserId()),
+        String.valueOf(event.getId()),
         event);
   }
 
@@ -143,15 +142,5 @@ class UpdateUserInboundEventHandlerTest {
         "+237",
         "699999999",
         LocalDateTime.now().minusDays(1));
-  }
-
-  private static void runCommandWhenExecuted(UseCaseExecutor executor) {
-    doAnswer(
-            invocation -> {
-              invocation.<Runnable>getArgument(0).run();
-              return null;
-            })
-        .when(executor)
-        .runCommand(any(Runnable.class));
   }
 }

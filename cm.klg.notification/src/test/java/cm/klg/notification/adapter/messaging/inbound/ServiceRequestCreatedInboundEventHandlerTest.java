@@ -1,12 +1,12 @@
 package cm.klg.notification.adapter.messaging.inbound;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-import cm.klg.common.base.transaction.UseCaseExecutor;
 import cm.klg.notification.application.usecase.CreateNotificationUseCase;
 import com.emb.domain.inboxevent.InboxEventCommand;
 import java.util.UUID;
@@ -22,7 +22,6 @@ import org.openapitools.model.ServiceRequestServiceRequestCreatedEventDTO;
 class ServiceRequestCreatedInboundEventHandlerTest {
 
   @Mock private CreateNotificationUseCase createNotificationUseCase;
-  @Mock private UseCaseExecutor useCaseExecutor;
   @Mock private MessagingInboundMapper messagingInboundMapper;
 
   @InjectMocks private ServiceRequestCreatedInboundEventHandler handler;
@@ -47,17 +46,10 @@ class ServiceRequestCreatedInboundEventHandlerTest {
     event.setProviderId(UUID.randomUUID());
     InboxEventCommand inboxEventCommand = givenInboxEventCommand(event);
 
-    doAnswer(
-            invocation -> {
-              invocation.getArgument(0, Runnable.class).run();
-              return null;
-            })
-        .when(useCaseExecutor)
-        .runCommand(any());
-
     handler.handle(event, inboxEventCommand);
 
-    verify(useCaseExecutor).runCommand(any());
+    verify(messagingInboundMapper).toServiceRequestCreatedNotificationCommand(event);
+    verify(createNotificationUseCase).execute(any());
   }
 
   @Test
@@ -69,15 +61,21 @@ class ServiceRequestCreatedInboundEventHandlerTest {
     event.setProviderId(UUID.randomUUID());
     InboxEventCommand inboxEventCommand = givenInboxEventCommand(event);
 
-    doThrow(new RuntimeException("Error")).when(useCaseExecutor).runCommand(any());
+    var command =
+        new CreateNotificationUseCase.CreateNotificationCommand(
+            cm.klg.notification.domaine.user.UserId.from(event.getProviderId()),
+            cm.klg.notification.domaine.user.UserId.from(event.getUserId()),
+            cm.klg.notification.domaine.notification.NotificationType.SERVICE_REQUEST_CREATED,
+            cm.klg.notification.domaine.notification.ReferenceType.SERVICE_REQUEST,
+            cm.klg.notification.domaine.notification.NotificationReferenceId.from(event.getId()));
 
-    try {
-      handler.handle(event, inboxEventCommand);
-    } catch (RuntimeException e) {
-      assertThat(e.getMessage()).isEqualTo("Error");
-    }
+    when(messagingInboundMapper.toServiceRequestCreatedNotificationCommand(event))
+        .thenReturn(command);
+    doThrow(new RuntimeException("Error")).when(createNotificationUseCase).execute(command);
 
-    verify(useCaseExecutor).runCommand(any());
+    assertThatThrownBy(() -> handler.handle(event, inboxEventCommand))
+        .isInstanceOf(RuntimeException.class)
+        .hasMessage("Error");
   }
 
   private static InboxEventCommand givenInboxEventCommand(

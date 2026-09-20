@@ -3,13 +3,10 @@ package cm.klg.notification.adapter.messaging.inbound;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
-import cm.klg.common.base.transaction.UseCaseExecutor;
 import cm.klg.generated.uam.adapter.messaging.inbound.dto.UamDomainEventType;
 import cm.klg.generated.uam.adapter.messaging.inbound.dto.UamUserDeletedEventDTO;
 import cm.klg.notification.application.outbound.UserRepository;
@@ -27,7 +24,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class DeleteUserInboundEventHandlerTest {
 
   @Mock private DeleteUserUseCase deleteUserUseCase;
-  @Mock private UseCaseExecutor useCaseExecutor;
 
   @InjectMocks private DeleteUserInboundEventHandler handler;
 
@@ -42,14 +38,14 @@ class DeleteUserInboundEventHandlerTest {
   }
 
   @Test
-  void shouldNotExecuteCommandWhenExecutorDoesNotRunItTest() {
-    UamUserDeletedEventDTO event = givenUserDeletedEvent();
+  void shouldDeleteUserFromEventDataTest() {
+    UUID userId = UUID.randomUUID();
+    UamUserDeletedEventDTO event = new UamUserDeletedEventDTO().id(userId);
     InboxEventCommand inboxEventCommand = givenInboxEventCommand(event);
 
     handler.handle(event, inboxEventCommand);
 
-    verify(deleteUserUseCase, never()).execute(any(UserId.class));
-    verify(useCaseExecutor).runCommand(any(Runnable.class));
+    verify(deleteUserUseCase).execute(UserId.from(userId));
   }
 
   @Test
@@ -58,7 +54,6 @@ class DeleteUserInboundEventHandlerTest {
     InboxEventCommand inboxEventCommand = givenInboxEventCommand(event);
 
     doThrow(new IllegalStateException("boom")).when(deleteUserUseCase).execute(any(UserId.class));
-    runCommandWhenExecuted(useCaseExecutor);
 
     assertThatThrownBy(() -> handler.handle(event, inboxEventCommand))
         .isInstanceOf(IllegalStateException.class)
@@ -68,22 +63,20 @@ class DeleteUserInboundEventHandlerTest {
   @Test
   void shouldDeleteUserFromEventDataThroughFullFlowTest() {
     UUID userId = UUID.randomUUID();
-    UamUserDeletedEventDTO event = new UamUserDeletedEventDTO().userId(userId);
+    UamUserDeletedEventDTO event = new UamUserDeletedEventDTO().id(userId);
     InboxEventCommand inboxEventCommand = givenInboxEventCommand(event);
 
     UserRepository userRepository = mock(UserRepository.class);
     DeleteUserInboundEventHandler realFlowHandler =
-        new DeleteUserInboundEventHandler(new DeleteUserUseCase(userRepository), useCaseExecutor);
-    runCommandWhenExecuted(useCaseExecutor);
+        new DeleteUserInboundEventHandler(new DeleteUserUseCase(userRepository));
 
     realFlowHandler.handle(event, inboxEventCommand);
 
     verify(userRepository).deleteById(UserId.from(userId));
-    verify(useCaseExecutor).runCommand(any(Runnable.class));
   }
 
   private static UamUserDeletedEventDTO givenUserDeletedEvent() {
-    return new UamUserDeletedEventDTO().userId(UUID.randomUUID());
+    return new UamUserDeletedEventDTO().id(UUID.randomUUID());
   }
 
   private static InboxEventCommand givenInboxEventCommand(UamUserDeletedEventDTO event) {
@@ -91,17 +84,7 @@ class DeleteUserInboundEventHandlerTest {
         UUID.randomUUID(),
         "user",
         UamDomainEventType.USER_DELETED.getValue(),
-        String.valueOf(event.getUserId()),
+        String.valueOf(event.getId()),
         event);
-  }
-
-  private static void runCommandWhenExecuted(UseCaseExecutor executor) {
-    doAnswer(
-            invocation -> {
-              invocation.<Runnable>getArgument(0).run();
-              return null;
-            })
-        .when(executor)
-        .runCommand(any(Runnable.class));
   }
 }

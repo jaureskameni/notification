@@ -29,7 +29,7 @@ import org.openapitools.model.ServiceRequestServiceRequestRejectedEventDTO;
 public interface MessagingInboundMapper {
 
   @BeanMapping(ignoreByDefault = true)
-  @Mapping(target = "id", source = "userId")
+  @Mapping(target = "id", source = "id")
   @Mapping(target = "profile.firstname", source = "firstname")
   @Mapping(target = "profile.lastname", source = "lastname")
   @Mapping(target = "profile.email", source = "email")
@@ -40,7 +40,7 @@ public interface MessagingInboundMapper {
       UamUserCreatedEventDTO userCreatedEventDTO);
 
   @BeanMapping(ignoreByDefault = true)
-  @Mapping(target = "id", source = "userId")
+  @Mapping(target = "id", source = "id")
   @Mapping(target = "profile.firstname", source = "firstname")
   @Mapping(target = "profile.lastname", source = "lastname")
   @Mapping(target = "profile.email", source = "email")
