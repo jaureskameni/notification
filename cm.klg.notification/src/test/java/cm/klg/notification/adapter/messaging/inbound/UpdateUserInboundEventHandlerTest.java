@@ -79,7 +79,7 @@ class UpdateUserInboundEventHandlerTest {
     LocalDateTime updatedAt = LocalDateTime.now().minusMinutes(10);
     UamUserUpdatedEventDTO event =
         new UamUserUpdatedEventDTO()
-            .userId(userId)
+            .id(userId)
             .lastname("Doe")
             .firstname(" John ")
             .email("john.doe@example.com")
@@ -118,7 +118,7 @@ class UpdateUserInboundEventHandlerTest {
 
   private static UamUserUpdatedEventDTO givenUserUpdatedEvent() {
     return new UamUserUpdatedEventDTO()
-        .userId(UUID.randomUUID())
+        .id(UUID.randomUUID())
         .lastname("Doe")
         .firstname(" John ")
         .email("john.doe@example.com")
@@ -131,7 +131,7 @@ class UpdateUserInboundEventHandlerTest {
         UUID.randomUUID(),
         "user",
         UamDomainEventType.USER_UPDATED.getValue(),
-        String.valueOf(event.getUserId()),
+        String.valueOf(event.getId()),
         event);
   }
 

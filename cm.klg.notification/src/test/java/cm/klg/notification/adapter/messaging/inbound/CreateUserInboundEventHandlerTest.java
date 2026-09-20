@@ -80,7 +80,7 @@ class CreateUserInboundEventHandlerTest {
     LocalDateTime createdAt = LocalDateTime.now().minusMinutes(10);
     UamUserCreatedEventDTO event =
         new UamUserCreatedEventDTO()
-            .userId(userId)
+            .id(userId)
             .lastname("Doe")
             .firstname(" John ")
             .email("john.doe@example.com")
@@ -119,7 +119,7 @@ class CreateUserInboundEventHandlerTest {
 
   private static UamUserCreatedEventDTO givenUserCreatedEvent() {
     return new UamUserCreatedEventDTO()
-        .userId(UUID.randomUUID())
+        .id(UUID.randomUUID())
         .lastname("Doe")
         .firstname(" John ")
         .email("john.doe@example.com")
@@ -132,7 +132,7 @@ class CreateUserInboundEventHandlerTest {
         UUID.randomUUID(),
         "user",
         UamDomainEventType.USER_CREATED.getValue(),
-        String.valueOf(event.getUserId()),
+        String.valueOf(event.getId()),
         event);
   }
 

@@ -25,6 +25,6 @@ public record DeleteUserInboundEventHandler(
   public void handle(
       UamUserDeletedEventDTO userDeletedEventDTO, InboxEventCommand inboxEventCommand) {
     useCaseExecutor.runCommand(
-        () -> deleteUserUseCase.execute(UserId.from(userDeletedEventDTO.getUserId())));
+        () -> deleteUserUseCase.execute(UserId.from(userDeletedEventDTO.getId())));
   }
 }

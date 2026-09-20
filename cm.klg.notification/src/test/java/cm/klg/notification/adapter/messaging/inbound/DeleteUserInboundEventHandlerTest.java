@@ -68,7 +68,7 @@ class DeleteUserInboundEventHandlerTest {
   @Test
   void shouldDeleteUserFromEventDataThroughFullFlowTest() {
     UUID userId = UUID.randomUUID();
-    UamUserDeletedEventDTO event = new UamUserDeletedEventDTO().userId(userId);
+    UamUserDeletedEventDTO event = new UamUserDeletedEventDTO().id(userId);
     InboxEventCommand inboxEventCommand = givenInboxEventCommand(event);
 
     UserRepository userRepository = mock(UserRepository.class);
@@ -83,7 +83,7 @@ class DeleteUserInboundEventHandlerTest {
   }
 
   private static UamUserDeletedEventDTO givenUserDeletedEvent() {
-    return new UamUserDeletedEventDTO().userId(UUID.randomUUID());
+    return new UamUserDeletedEventDTO().id(UUID.randomUUID());
   }
 
   private static InboxEventCommand givenInboxEventCommand(UamUserDeletedEventDTO event) {
@@ -91,7 +91,7 @@ class DeleteUserInboundEventHandlerTest {
         UUID.randomUUID(),
         "user",
         UamDomainEventType.USER_DELETED.getValue(),
-        String.valueOf(event.getUserId()),
+        String.valueOf(event.getId()),
         event);
   }
 
