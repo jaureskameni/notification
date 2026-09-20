@@ -1,6 +1,5 @@
 package cm.klg.notification.adapter.messaging.inbound;
 
-import cm.klg.common.base.transaction.UseCaseExecutor;
 import cm.klg.generated.uam.adapter.messaging.inbound.dto.UamDomainEventType;
 import cm.klg.generated.uam.adapter.messaging.inbound.dto.UamUserUpdatedEventDTO;
 import cm.klg.notification.application.usecase.UpdateUserUseCase;
@@ -8,9 +7,7 @@ import com.emb.application.handler.InboxEventHandler;
 import com.emb.domain.inboxevent.InboxEventCommand;
 
 public record UpdateUserInboundEventHandler(
-    UpdateUserUseCase updateUserUseCase,
-    MessagingInboundMapper messagingInboundMapper,
-    UseCaseExecutor useCaseExecutor)
+    UpdateUserUseCase updateUserUseCase, MessagingInboundMapper messagingInboundMapper)
     implements InboxEventHandler<UamUserUpdatedEventDTO> {
   @Override
   public String getEventType() {
@@ -25,9 +22,6 @@ public record UpdateUserInboundEventHandler(
   @Override
   public void handle(
       UamUserUpdatedEventDTO userUpdatedEventDTO, InboxEventCommand inboxEventCommand) {
-    useCaseExecutor.runCommand(
-        () ->
-            updateUserUseCase.execute(
-                messagingInboundMapper.toUpdateUserCommand(userUpdatedEventDTO)));
+    updateUserUseCase.execute(messagingInboundMapper.toUpdateUserCommand(userUpdatedEventDTO));
   }
 }

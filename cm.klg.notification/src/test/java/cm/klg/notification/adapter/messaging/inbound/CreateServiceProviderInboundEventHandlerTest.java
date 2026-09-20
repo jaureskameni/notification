@@ -1,13 +1,14 @@
 package cm.klg.notification.adapter.messaging.inbound;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-import cm.klg.common.base.transaction.UseCaseExecutor;
 import cm.klg.notification.application.usecase.CreateNotificationUseCase;
+import cm.klg.notification.domaine.user.UserId;
 import com.emb.domain.inboxevent.InboxEventCommand;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -22,7 +23,6 @@ import org.openapitools.model.ServiceProviderServiceProviderCreatedEventDTO;
 class CreateServiceProviderInboundEventHandlerTest {
 
   @Mock private CreateNotificationUseCase createNotificationUseCase;
-  @Mock private UseCaseExecutor useCaseExecutor;
   @Mock private MessagingInboundMapper messagingInboundMapper;
 
   @InjectMocks
@@ -30,17 +30,14 @@ class CreateServiceProviderInboundEventHandlerTest {
 
   @Test
   void shouldExposeServiceProviderCreatedEventTypeTest() {
-    String eventType = createServiceProviderInboundEventHandler.getEventType();
-
-    assertThat(eventType)
+    assertThat(createServiceProviderInboundEventHandler.getEventType())
         .isEqualTo(ServiceProviderDomainEventType.SERVICE_PROVIDER_CREATED.getValue());
   }
 
   @Test
   void shouldExposeServiceProviderCreatedEventDTODataTypeTest() {
-    Class<?> dataType = createServiceProviderInboundEventHandler.getDataType();
-
-    assertThat(dataType).isEqualTo(ServiceProviderServiceProviderCreatedEventDTO.class);
+    assertThat(createServiceProviderInboundEventHandler.getDataType())
+        .isEqualTo(ServiceProviderServiceProviderCreatedEventDTO.class);
   }
 
   @Test
@@ -51,17 +48,10 @@ class CreateServiceProviderInboundEventHandlerTest {
     event.setServiceProviderId(UUID.randomUUID());
     InboxEventCommand inboxEventCommand = givenInboxEventCommand(event);
 
-    doAnswer(
-            invocation -> {
-              invocation.getArgument(0, Runnable.class).run();
-              return null;
-            })
-        .when(useCaseExecutor)
-        .runCommand(any());
-
     createServiceProviderInboundEventHandler.handle(event, inboxEventCommand);
 
-    verify(useCaseExecutor).runCommand(any());
+    verify(messagingInboundMapper).toCreatedNotificationCommand(event);
+    verify(createNotificationUseCase).execute(any());
   }
 
   @Test
@@ -71,16 +61,22 @@ class CreateServiceProviderInboundEventHandlerTest {
     event.setUserId(UUID.randomUUID());
     event.setServiceProviderId(UUID.randomUUID());
     InboxEventCommand inboxEventCommand = givenInboxEventCommand(event);
+    var command =
+        new CreateNotificationUseCase.CreateNotificationCommand(
+            UserId.from(UUID.randomUUID()),
+            UserId.from(UUID.randomUUID()),
+            cm.klg.notification.domaine.notification.NotificationType.SERVICE_PROVIDER_CREATED,
+            cm.klg.notification.domaine.notification.ReferenceType.SERVICE_PROVIDER,
+            cm.klg.notification.domaine.notification.NotificationReferenceId.from(
+                UUID.randomUUID()));
 
-    doThrow(new RuntimeException("Error")).when(useCaseExecutor).runCommand(any());
+    when(messagingInboundMapper.toCreatedNotificationCommand(event)).thenReturn(command);
+    doThrow(new RuntimeException("Error")).when(createNotificationUseCase).execute(command);
 
-    try {
-      createServiceProviderInboundEventHandler.handle(event, inboxEventCommand);
-    } catch (RuntimeException e) {
-      assertThat(e.getMessage()).isEqualTo("Error");
-    }
-
-    verify(useCaseExecutor).runCommand(any());
+    assertThatThrownBy(
+            () -> createServiceProviderInboundEventHandler.handle(event, inboxEventCommand))
+        .isInstanceOf(RuntimeException.class)
+        .hasMessage("Error");
   }
 
   private static InboxEventCommand givenInboxEventCommand(

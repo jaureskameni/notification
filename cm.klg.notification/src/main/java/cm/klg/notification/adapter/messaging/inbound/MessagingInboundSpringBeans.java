@@ -1,6 +1,5 @@
 package cm.klg.notification.adapter.messaging.inbound;
 
-import cm.klg.common.base.transaction.UseCaseExecutor;
 import cm.klg.notification.application.usecase.CreateNewUserUseCase;
 import cm.klg.notification.application.usecase.CreateNotificationUseCase;
 import cm.klg.notification.application.usecase.DeleteUserUseCase;
@@ -13,88 +12,75 @@ public class MessagingInboundSpringBeans {
 
   @Bean
   public CreateUserInboundEventHandler createUserInboundEventHandler(
-      CreateNewUserUseCase createNewUserUseCase,
-      MessagingInboundMapper messagingInboundMapper,
-      UseCaseExecutor useCaseExecutor) {
-    return new CreateUserInboundEventHandler(
-        createNewUserUseCase, messagingInboundMapper, useCaseExecutor);
+      CreateNewUserUseCase createNewUserUseCase, MessagingInboundMapper messagingInboundMapper) {
+    return new CreateUserInboundEventHandler(createNewUserUseCase, messagingInboundMapper);
   }
 
   @Bean
   public UpdateUserInboundEventHandler updateUserInboundEventHandler(
-      UpdateUserUseCase updateUserUseCase,
-      MessagingInboundMapper messagingInboundMapper,
-      UseCaseExecutor useCaseExecutor) {
-    return new UpdateUserInboundEventHandler(
-        updateUserUseCase, messagingInboundMapper, useCaseExecutor);
+      UpdateUserUseCase updateUserUseCase, MessagingInboundMapper messagingInboundMapper) {
+    return new UpdateUserInboundEventHandler(updateUserUseCase, messagingInboundMapper);
   }
 
   @Bean
   public DeleteUserInboundEventHandler deleteUserInboundEventHandler(
-      DeleteUserUseCase deleteUserUseCase, UseCaseExecutor useCaseExecutor) {
-    return new DeleteUserInboundEventHandler(deleteUserUseCase, useCaseExecutor);
+      DeleteUserUseCase deleteUserUseCase) {
+    return new DeleteUserInboundEventHandler(deleteUserUseCase);
   }
 
   @Bean
   public CreateServiceProviderInboundEventHandler createServiceProviderInboundEventHandler(
       CreateNotificationUseCase createNotificationUseCase,
-      MessagingInboundMapper messagingInboundMapper,
-      UseCaseExecutor useCaseExecutor) {
+      MessagingInboundMapper messagingInboundMapper) {
     return new CreateServiceProviderInboundEventHandler(
-        createNotificationUseCase, useCaseExecutor, messagingInboundMapper);
+        createNotificationUseCase, messagingInboundMapper);
   }
 
   @Bean
   public ApproveServiceProviderInboundEventHandler approveServiceProviderInboundEventHandler(
       CreateNotificationUseCase createNotificationUseCase,
-      MessagingInboundMapper messagingInboundMapper,
-      UseCaseExecutor useCaseExecutor) {
+      MessagingInboundMapper messagingInboundMapper) {
     return new ApproveServiceProviderInboundEventHandler(
-        createNotificationUseCase, useCaseExecutor, messagingInboundMapper);
+        createNotificationUseCase, messagingInboundMapper);
   }
 
   @Bean
   public RejectServiceProviderInboundEventHandler rejectServiceProviderInboundEventHandler(
       CreateNotificationUseCase createNotificationUseCase,
-      MessagingInboundMapper messagingInboundMapper,
-      UseCaseExecutor useCaseExecutor) {
+      MessagingInboundMapper messagingInboundMapper) {
     return new RejectServiceProviderInboundEventHandler(
-        createNotificationUseCase, useCaseExecutor, messagingInboundMapper);
+        createNotificationUseCase, messagingInboundMapper);
   }
 
   @Bean
   public ServiceRequestCreatedInboundEventHandler serviceRequestCreatedInboundEventHandler(
       CreateNotificationUseCase createNotificationUseCase,
-      MessagingInboundMapper messagingInboundMapper,
-      UseCaseExecutor useCaseExecutor) {
+      MessagingInboundMapper messagingInboundMapper) {
     return new ServiceRequestCreatedInboundEventHandler(
-        createNotificationUseCase, useCaseExecutor, messagingInboundMapper);
+        createNotificationUseCase, messagingInboundMapper);
   }
 
   @Bean
   public ServiceRequestAcceptedInboundEventHandler serviceRequestAcceptedInboundEventHandler(
       CreateNotificationUseCase createNotificationUseCase,
-      MessagingInboundMapper messagingInboundMapper,
-      UseCaseExecutor useCaseExecutor) {
+      MessagingInboundMapper messagingInboundMapper) {
     return new ServiceRequestAcceptedInboundEventHandler(
-        createNotificationUseCase, useCaseExecutor, messagingInboundMapper);
+        createNotificationUseCase, messagingInboundMapper);
   }
 
   @Bean
   public ServiceRequestRejectedInboundEventHandler serviceRequestRejectedInboundEventHandler(
       CreateNotificationUseCase createNotificationUseCase,
-      MessagingInboundMapper messagingInboundMapper,
-      UseCaseExecutor useCaseExecutor) {
+      MessagingInboundMapper messagingInboundMapper) {
     return new ServiceRequestRejectedInboundEventHandler(
-        createNotificationUseCase, useCaseExecutor, messagingInboundMapper);
+        createNotificationUseCase, messagingInboundMapper);
   }
 
   @Bean
   public ServiceRequestCancelledInboundEventHandler serviceRequestCancelledInboundEventHandler(
       CreateNotificationUseCase createNotificationUseCase,
-      MessagingInboundMapper messagingInboundMapper,
-      UseCaseExecutor useCaseExecutor) {
+      MessagingInboundMapper messagingInboundMapper) {
     return new ServiceRequestCancelledInboundEventHandler(
-        createNotificationUseCase, useCaseExecutor, messagingInboundMapper);
+        createNotificationUseCase, messagingInboundMapper);
   }
 }

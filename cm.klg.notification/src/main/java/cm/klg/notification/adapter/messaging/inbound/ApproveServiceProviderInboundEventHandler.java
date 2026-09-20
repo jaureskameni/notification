@@ -1,6 +1,5 @@
 package cm.klg.notification.adapter.messaging.inbound;
 
-import cm.klg.common.base.transaction.UseCaseExecutor;
 import cm.klg.notification.application.usecase.CreateNotificationUseCase;
 import com.emb.application.handler.InboxEventHandler;
 import com.emb.domain.inboxevent.InboxEventCommand;
@@ -9,7 +8,6 @@ import org.openapitools.model.ServiceProviderServiceProviderApprovedEventDTO;
 
 public record ApproveServiceProviderInboundEventHandler(
     CreateNotificationUseCase createNotificationUseCase,
-    UseCaseExecutor useCaseExecutor,
     MessagingInboundMapper messagingInboundMapper)
     implements InboxEventHandler<ServiceProviderServiceProviderApprovedEventDTO> {
   @Override
@@ -26,9 +24,7 @@ public record ApproveServiceProviderInboundEventHandler(
   public void handle(
       ServiceProviderServiceProviderApprovedEventDTO providerApprovedEventDTO,
       InboxEventCommand inboxEventCommand) {
-    useCaseExecutor.runCommand(
-        () ->
-            createNotificationUseCase.execute(
-                messagingInboundMapper.toApprovedNotificationCommand(providerApprovedEventDTO)));
+    createNotificationUseCase.execute(
+        messagingInboundMapper.toApprovedNotificationCommand(providerApprovedEventDTO));
   }
 }
