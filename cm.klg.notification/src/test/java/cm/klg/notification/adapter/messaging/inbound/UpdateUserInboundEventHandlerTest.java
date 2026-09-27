@@ -34,12 +34,12 @@ class UpdateUserInboundEventHandlerTest {
 
   @Test
   void shouldExposeUserUpdatedEventTypeTest() {
-    assertThat(handler.getEventType()).isEqualTo(UamDomainEventType.USER_UPDATED.getValue());
+    assertThat(handler.handledEventType()).isEqualTo(UamDomainEventType.USER_UPDATED.getValue());
   }
 
   @Test
   void shouldExposeUamUserUpdatedEventDataTypeTest() {
-    assertThat(handler.getDataType()).isEqualTo(UamUserUpdatedEventDTO.class);
+    assertThat(handler.payloadType()).isEqualTo(UamUserUpdatedEventDTO.class);
   }
 
   @Test
@@ -54,9 +54,9 @@ class UpdateUserInboundEventHandlerTest {
             .email("john.doe@example.com")
             .phoneNumber(new UamPhoneNumberDTO().countryCode("+237").number("699999999"))
             .updatedAt(updatedAt);
-    InboxEventCommand inboxEventCommand = givenInboxEventCommand(event);
+    InboxEventCommand<UamUserUpdatedEventDTO> inboxEventCommand = givenInboxEventCommand(event);
 
-    handler.handle(event, inboxEventCommand);
+    handler.handle(inboxEventCommand);
 
     verify(messagingInboundMapper).toUpdateUserCommand(event);
     verify(updateUserUseCase).execute(any());
@@ -65,13 +65,13 @@ class UpdateUserInboundEventHandlerTest {
   @Test
   void shouldPropagateExceptionRaisedByUseCaseTest() {
     UamUserUpdatedEventDTO event = givenUserUpdatedEvent();
-    InboxEventCommand inboxEventCommand = givenInboxEventCommand(event);
+    InboxEventCommand<UamUserUpdatedEventDTO> inboxEventCommand = givenInboxEventCommand(event);
     UpdateUserUseCase.UpdateUserCommand command = givenUpdateUserCommand();
 
     when(messagingInboundMapper.toUpdateUserCommand(event)).thenReturn(command);
     doThrow(new IllegalStateException("boom")).when(updateUserUseCase).execute(command);
 
-    assertThatThrownBy(() -> handler.handle(event, inboxEventCommand))
+    assertThatThrownBy(() -> handler.handle(inboxEventCommand))
         .isInstanceOf(IllegalStateException.class)
         .hasMessage("boom");
   }
@@ -88,14 +88,14 @@ class UpdateUserInboundEventHandlerTest {
             .email("john.doe@example.com")
             .phoneNumber(new UamPhoneNumberDTO().countryCode("+237").number("699999999"))
             .updatedAt(updatedAt);
-    InboxEventCommand inboxEventCommand = givenInboxEventCommand(event);
+    InboxEventCommand<UamUserUpdatedEventDTO> inboxEventCommand = givenInboxEventCommand(event);
 
     UserRepository userRepository = mock(UserRepository.class);
     UpdateUserInboundEventHandler realFlowHandler =
         new UpdateUserInboundEventHandler(
             new UpdateUserUseCase(userRepository), new MessagingInboundMapperImpl());
 
-    realFlowHandler.handle(event, inboxEventCommand);
+    realFlowHandler.handle(inboxEventCommand);
 
     ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
     verify(userRepository).update(userCaptor.capture());
@@ -125,8 +125,9 @@ class UpdateUserInboundEventHandlerTest {
         .updatedAt(LocalDateTime.now().minusMinutes(10));
   }
 
-  private static InboxEventCommand givenInboxEventCommand(UamUserUpdatedEventDTO event) {
-    return new InboxEventCommand(
+  private static InboxEventCommand<UamUserUpdatedEventDTO> givenInboxEventCommand(
+      UamUserUpdatedEventDTO event) {
+    return new InboxEventCommand<>(
         UUID.randomUUID(),
         "user",
         UamDomainEventType.USER_UPDATED.getValue(),

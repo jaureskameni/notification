@@ -1,7 +1,7 @@
 package cm.klg.notification.adapter.messaging.inbound;
 
 import cm.klg.notification.application.usecase.CreateNotificationUseCase;
-import com.emb.application.handler.InboxEventHandler;
+import com.emb.application.handler.InboundEventHandler;
 import com.emb.domain.inboxevent.InboxEventCommand;
 import org.openapitools.model.ServiceRequestDomainEventType;
 import org.openapitools.model.ServiceRequestServiceRequestRejectedEventDTO;
@@ -9,21 +9,22 @@ import org.openapitools.model.ServiceRequestServiceRequestRejectedEventDTO;
 public record ServiceRequestRejectedInboundEventHandler(
     CreateNotificationUseCase createNotificationUseCase,
     MessagingInboundMapper messagingInboundMapper)
-    implements InboxEventHandler<ServiceRequestServiceRequestRejectedEventDTO> {
+    implements InboundEventHandler<ServiceRequestServiceRequestRejectedEventDTO> {
   @Override
-  public String getEventType() {
+  public String handledEventType() {
     return ServiceRequestDomainEventType.SERVICE_REQUEST_REJECTED.getValue();
   }
 
   @Override
-  public Class<ServiceRequestServiceRequestRejectedEventDTO> getDataType() {
+  public Class<ServiceRequestServiceRequestRejectedEventDTO> payloadType() {
     return ServiceRequestServiceRequestRejectedEventDTO.class;
   }
 
   @Override
   public void handle(
-      ServiceRequestServiceRequestRejectedEventDTO event, InboxEventCommand inboxEventCommand) {
+      InboxEventCommand<ServiceRequestServiceRequestRejectedEventDTO> inboxEventCommand) {
     createNotificationUseCase.execute(
-        messagingInboundMapper.toServiceRequestRejectedNotificationCommand(event));
+        messagingInboundMapper.toServiceRequestRejectedNotificationCommand(
+            inboxEventCommand.data()));
   }
 }

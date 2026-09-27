@@ -28,13 +28,13 @@ class ServiceRequestRejectedInboundEventHandlerTest {
 
   @Test
   void shouldExposeServiceRequestRejectedEventTypeTest() {
-    assertThat(handler.getEventType())
+    assertThat(handler.handledEventType())
         .isEqualTo(ServiceRequestDomainEventType.SERVICE_REQUEST_REJECTED.getValue());
   }
 
   @Test
   void shouldExposeServiceRequestRejectedEventDTODataTypeTest() {
-    assertThat(handler.getDataType()).isEqualTo(ServiceRequestServiceRequestRejectedEventDTO.class);
+    assertThat(handler.payloadType()).isEqualTo(ServiceRequestServiceRequestRejectedEventDTO.class);
   }
 
   @Test
@@ -46,7 +46,7 @@ class ServiceRequestRejectedInboundEventHandlerTest {
     event.setProviderId(UUID.randomUUID());
     InboxEventCommand inboxEventCommand = givenInboxEventCommand(event);
 
-    handler.handle(event, inboxEventCommand);
+    handler.handle(inboxEventCommand);
 
     verify(messagingInboundMapper).toServiceRequestRejectedNotificationCommand(event);
     verify(createNotificationUseCase).execute(any());
@@ -73,14 +73,14 @@ class ServiceRequestRejectedInboundEventHandlerTest {
         .thenReturn(command);
     doThrow(new RuntimeException("Error")).when(createNotificationUseCase).execute(command);
 
-    assertThatThrownBy(() -> handler.handle(event, inboxEventCommand))
+    assertThatThrownBy(() -> handler.handle(inboxEventCommand))
         .isInstanceOf(RuntimeException.class)
         .hasMessage("Error");
   }
 
-  private static InboxEventCommand givenInboxEventCommand(
-      ServiceRequestServiceRequestRejectedEventDTO event) {
-    return new InboxEventCommand(
+  private static InboxEventCommand<ServiceRequestServiceRequestRejectedEventDTO>
+      givenInboxEventCommand(ServiceRequestServiceRequestRejectedEventDTO event) {
+    return new InboxEventCommand<>(
         UUID.randomUUID(),
         "service-request",
         ServiceRequestDomainEventType.SERVICE_REQUEST_REJECTED.getValue(),
