@@ -37,7 +37,7 @@ class ServiceProviderNotificationInboundEventHandlerTest {
 
     new ApproveServiceProviderInboundEventHandler(
             createNotificationUseCase, new MessagingInboundMapperImpl())
-        .handle(event, inboxEvent(event));
+        .handle(inboxEvent(event));
 
     assertNotification(
         NotificationType.SERVICE_PROVIDER_APPROVED, recipientId, actorId, serviceProviderId);
@@ -56,7 +56,7 @@ class ServiceProviderNotificationInboundEventHandlerTest {
 
     new CreateServiceProviderInboundEventHandler(
             createNotificationUseCase, new MessagingInboundMapperImpl())
-        .handle(event, inboxEvent(event));
+        .handle(inboxEvent(event));
 
     assertNotification(
         NotificationType.SERVICE_PROVIDER_CREATED, userId, userId, serviceProviderId);
@@ -78,7 +78,7 @@ class ServiceProviderNotificationInboundEventHandlerTest {
 
     new RejectServiceProviderInboundEventHandler(
             createNotificationUseCase, new MessagingInboundMapperImpl())
-        .handle(event, inboxEvent(event));
+        .handle(inboxEvent(event));
 
     assertNotification(
         NotificationType.SERVICE_PROVIDER_REJECTED, recipientId, actorId, serviceProviderId);
@@ -99,7 +99,7 @@ class ServiceProviderNotificationInboundEventHandlerTest {
             });
   }
 
-  private static InboxEventCommand inboxEvent(Object event) {
-    return new InboxEventCommand(UUID.randomUUID(), "serviceProvider", "event", "key", event);
+  private static <T> InboxEventCommand<T> inboxEvent(T event) {
+    return new InboxEventCommand<>(UUID.randomUUID(), "serviceProvider", "event", "key", event);
   }
 }

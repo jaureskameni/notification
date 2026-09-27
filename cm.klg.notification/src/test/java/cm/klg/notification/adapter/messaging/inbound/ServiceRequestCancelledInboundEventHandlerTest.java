@@ -28,13 +28,13 @@ class ServiceRequestCancelledInboundEventHandlerTest {
 
   @Test
   void shouldExposeServiceRequestCancelledEventTypeTest() {
-    assertThat(handler.getEventType())
+    assertThat(handler.handledEventType())
         .isEqualTo(ServiceRequestDomainEventType.SERVICE_REQUEST_CANCELLED.getValue());
   }
 
   @Test
   void shouldExposeServiceRequestCancelledEventDTODataTypeTest() {
-    assertThat(handler.getDataType())
+    assertThat(handler.payloadType())
         .isEqualTo(ServiceRequestServiceRequestCancelledEventDTO.class);
   }
 
@@ -47,7 +47,7 @@ class ServiceRequestCancelledInboundEventHandlerTest {
     event.setProviderId(UUID.randomUUID());
     InboxEventCommand inboxEventCommand = givenInboxEventCommand(event);
 
-    handler.handle(event, inboxEventCommand);
+    handler.handle(inboxEventCommand);
 
     verify(messagingInboundMapper).toServiceRequestCancelledNotificationCommand(event);
     verify(createNotificationUseCase).execute(any());
@@ -74,14 +74,14 @@ class ServiceRequestCancelledInboundEventHandlerTest {
         .thenReturn(command);
     doThrow(new RuntimeException("Error")).when(createNotificationUseCase).execute(command);
 
-    assertThatThrownBy(() -> handler.handle(event, inboxEventCommand))
+    assertThatThrownBy(() -> handler.handle(inboxEventCommand))
         .isInstanceOf(RuntimeException.class)
         .hasMessage("Error");
   }
 
-  private static InboxEventCommand givenInboxEventCommand(
-      ServiceRequestServiceRequestCancelledEventDTO event) {
-    return new InboxEventCommand(
+  private static InboxEventCommand<ServiceRequestServiceRequestCancelledEventDTO>
+      givenInboxEventCommand(ServiceRequestServiceRequestCancelledEventDTO event) {
+    return new InboxEventCommand<>(
         UUID.randomUUID(),
         "service-request",
         ServiceRequestDomainEventType.SERVICE_REQUEST_CANCELLED.getValue(),

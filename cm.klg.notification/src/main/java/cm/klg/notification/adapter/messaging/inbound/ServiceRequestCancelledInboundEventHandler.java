@@ -1,7 +1,7 @@
 package cm.klg.notification.adapter.messaging.inbound;
 
 import cm.klg.notification.application.usecase.CreateNotificationUseCase;
-import com.emb.application.handler.InboxEventHandler;
+import com.emb.application.handler.InboundEventHandler;
 import com.emb.domain.inboxevent.InboxEventCommand;
 import org.openapitools.model.ServiceRequestDomainEventType;
 import org.openapitools.model.ServiceRequestServiceRequestCancelledEventDTO;
@@ -9,21 +9,22 @@ import org.openapitools.model.ServiceRequestServiceRequestCancelledEventDTO;
 public record ServiceRequestCancelledInboundEventHandler(
     CreateNotificationUseCase createNotificationUseCase,
     MessagingInboundMapper messagingInboundMapper)
-    implements InboxEventHandler<ServiceRequestServiceRequestCancelledEventDTO> {
+    implements InboundEventHandler<ServiceRequestServiceRequestCancelledEventDTO> {
   @Override
-  public String getEventType() {
+  public String handledEventType() {
     return ServiceRequestDomainEventType.SERVICE_REQUEST_CANCELLED.getValue();
   }
 
   @Override
-  public Class<ServiceRequestServiceRequestCancelledEventDTO> getDataType() {
+  public Class<ServiceRequestServiceRequestCancelledEventDTO> payloadType() {
     return ServiceRequestServiceRequestCancelledEventDTO.class;
   }
 
   @Override
   public void handle(
-      ServiceRequestServiceRequestCancelledEventDTO event, InboxEventCommand inboxEventCommand) {
+      InboxEventCommand<ServiceRequestServiceRequestCancelledEventDTO> inboxEventCommand) {
     createNotificationUseCase.execute(
-        messagingInboundMapper.toServiceRequestCancelledNotificationCommand(event));
+        messagingInboundMapper.toServiceRequestCancelledNotificationCommand(
+            inboxEventCommand.data()));
   }
 }

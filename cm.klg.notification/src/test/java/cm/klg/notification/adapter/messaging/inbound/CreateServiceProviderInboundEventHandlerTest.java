@@ -30,13 +30,13 @@ class CreateServiceProviderInboundEventHandlerTest {
 
   @Test
   void shouldExposeServiceProviderCreatedEventTypeTest() {
-    assertThat(createServiceProviderInboundEventHandler.getEventType())
+    assertThat(createServiceProviderInboundEventHandler.handledEventType())
         .isEqualTo(ServiceProviderDomainEventType.SERVICE_PROVIDER_CREATED.getValue());
   }
 
   @Test
   void shouldExposeServiceProviderCreatedEventDTODataTypeTest() {
-    assertThat(createServiceProviderInboundEventHandler.getDataType())
+    assertThat(createServiceProviderInboundEventHandler.payloadType())
         .isEqualTo(ServiceProviderServiceProviderCreatedEventDTO.class);
   }
 
@@ -48,7 +48,7 @@ class CreateServiceProviderInboundEventHandlerTest {
     event.setServiceProviderId(UUID.randomUUID());
     InboxEventCommand inboxEventCommand = givenInboxEventCommand(event);
 
-    createServiceProviderInboundEventHandler.handle(event, inboxEventCommand);
+    createServiceProviderInboundEventHandler.handle(inboxEventCommand);
 
     verify(messagingInboundMapper).toCreatedNotificationCommand(event);
     verify(createNotificationUseCase).execute(any());
@@ -73,15 +73,14 @@ class CreateServiceProviderInboundEventHandlerTest {
     when(messagingInboundMapper.toCreatedNotificationCommand(event)).thenReturn(command);
     doThrow(new RuntimeException("Error")).when(createNotificationUseCase).execute(command);
 
-    assertThatThrownBy(
-            () -> createServiceProviderInboundEventHandler.handle(event, inboxEventCommand))
+    assertThatThrownBy(() -> createServiceProviderInboundEventHandler.handle(inboxEventCommand))
         .isInstanceOf(RuntimeException.class)
         .hasMessage("Error");
   }
 
-  private static InboxEventCommand givenInboxEventCommand(
-      ServiceProviderServiceProviderCreatedEventDTO event) {
-    return new InboxEventCommand(
+  private static InboxEventCommand<ServiceProviderServiceProviderCreatedEventDTO>
+      givenInboxEventCommand(ServiceProviderServiceProviderCreatedEventDTO event) {
+    return new InboxEventCommand<>(
         UUID.randomUUID(),
         "service-provider",
         ServiceProviderDomainEventType.SERVICE_PROVIDER_CREATED.getValue(),

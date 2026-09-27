@@ -1,7 +1,7 @@
 package cm.klg.notification.adapter.messaging.inbound;
 
 import cm.klg.notification.application.usecase.CreateNotificationUseCase;
-import com.emb.application.handler.InboxEventHandler;
+import com.emb.application.handler.InboundEventHandler;
 import com.emb.domain.inboxevent.InboxEventCommand;
 import org.openapitools.model.ServiceRequestDomainEventType;
 import org.openapitools.model.ServiceRequestServiceRequestAcceptedEventDTO;
@@ -9,21 +9,22 @@ import org.openapitools.model.ServiceRequestServiceRequestAcceptedEventDTO;
 public record ServiceRequestAcceptedInboundEventHandler(
     CreateNotificationUseCase createNotificationUseCase,
     MessagingInboundMapper messagingInboundMapper)
-    implements InboxEventHandler<ServiceRequestServiceRequestAcceptedEventDTO> {
+    implements InboundEventHandler<ServiceRequestServiceRequestAcceptedEventDTO> {
   @Override
-  public String getEventType() {
+  public String handledEventType() {
     return ServiceRequestDomainEventType.SERVICE_REQUEST_ACCEPTED.getValue();
   }
 
   @Override
-  public Class<ServiceRequestServiceRequestAcceptedEventDTO> getDataType() {
+  public Class<ServiceRequestServiceRequestAcceptedEventDTO> payloadType() {
     return ServiceRequestServiceRequestAcceptedEventDTO.class;
   }
 
   @Override
   public void handle(
-      ServiceRequestServiceRequestAcceptedEventDTO event, InboxEventCommand inboxEventCommand) {
+      InboxEventCommand<ServiceRequestServiceRequestAcceptedEventDTO> inboxEventCommand) {
     createNotificationUseCase.execute(
-        messagingInboundMapper.toServiceRequestAcceptedNotificationCommand(event));
+        messagingInboundMapper.toServiceRequestAcceptedNotificationCommand(
+            inboxEventCommand.data()));
   }
 }

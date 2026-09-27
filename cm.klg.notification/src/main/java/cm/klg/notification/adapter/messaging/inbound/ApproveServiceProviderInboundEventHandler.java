@@ -1,7 +1,7 @@
 package cm.klg.notification.adapter.messaging.inbound;
 
 import cm.klg.notification.application.usecase.CreateNotificationUseCase;
-import com.emb.application.handler.InboxEventHandler;
+import com.emb.application.handler.InboundEventHandler;
 import com.emb.domain.inboxevent.InboxEventCommand;
 import org.openapitools.model.ServiceProviderDomainEventType;
 import org.openapitools.model.ServiceProviderServiceProviderApprovedEventDTO;
@@ -9,22 +9,21 @@ import org.openapitools.model.ServiceProviderServiceProviderApprovedEventDTO;
 public record ApproveServiceProviderInboundEventHandler(
     CreateNotificationUseCase createNotificationUseCase,
     MessagingInboundMapper messagingInboundMapper)
-    implements InboxEventHandler<ServiceProviderServiceProviderApprovedEventDTO> {
+    implements InboundEventHandler<ServiceProviderServiceProviderApprovedEventDTO> {
   @Override
-  public String getEventType() {
+  public String handledEventType() {
     return ServiceProviderDomainEventType.SERVICE_PROVIDER_APPROVED.getValue();
   }
 
   @Override
-  public Class<ServiceProviderServiceProviderApprovedEventDTO> getDataType() {
+  public Class<ServiceProviderServiceProviderApprovedEventDTO> payloadType() {
     return ServiceProviderServiceProviderApprovedEventDTO.class;
   }
 
   @Override
   public void handle(
-      ServiceProviderServiceProviderApprovedEventDTO providerApprovedEventDTO,
-      InboxEventCommand inboxEventCommand) {
+      InboxEventCommand<ServiceProviderServiceProviderApprovedEventDTO> inboxEventCommand) {
     createNotificationUseCase.execute(
-        messagingInboundMapper.toApprovedNotificationCommand(providerApprovedEventDTO));
+        messagingInboundMapper.toApprovedNotificationCommand(inboxEventCommand.data()));
   }
 }

@@ -28,13 +28,13 @@ class ServiceRequestCreatedInboundEventHandlerTest {
 
   @Test
   void shouldExposeServiceRequestCreatedEventTypeTest() {
-    assertThat(handler.getEventType())
+    assertThat(handler.handledEventType())
         .isEqualTo(ServiceRequestDomainEventType.SERVICE_REQUEST_CREATED.getValue());
   }
 
   @Test
   void shouldExposeServiceRequestCreatedEventDTODataTypeTest() {
-    assertThat(handler.getDataType()).isEqualTo(ServiceRequestServiceRequestCreatedEventDTO.class);
+    assertThat(handler.payloadType()).isEqualTo(ServiceRequestServiceRequestCreatedEventDTO.class);
   }
 
   @Test
@@ -46,7 +46,7 @@ class ServiceRequestCreatedInboundEventHandlerTest {
     event.setProviderId(UUID.randomUUID());
     InboxEventCommand inboxEventCommand = givenInboxEventCommand(event);
 
-    handler.handle(event, inboxEventCommand);
+    handler.handle(inboxEventCommand);
 
     verify(messagingInboundMapper).toServiceRequestCreatedNotificationCommand(event);
     verify(createNotificationUseCase).execute(any());
@@ -73,14 +73,14 @@ class ServiceRequestCreatedInboundEventHandlerTest {
         .thenReturn(command);
     doThrow(new RuntimeException("Error")).when(createNotificationUseCase).execute(command);
 
-    assertThatThrownBy(() -> handler.handle(event, inboxEventCommand))
+    assertThatThrownBy(() -> handler.handle(inboxEventCommand))
         .isInstanceOf(RuntimeException.class)
         .hasMessage("Error");
   }
 
-  private static InboxEventCommand givenInboxEventCommand(
-      ServiceRequestServiceRequestCreatedEventDTO event) {
-    return new InboxEventCommand(
+  private static InboxEventCommand<ServiceRequestServiceRequestCreatedEventDTO>
+      givenInboxEventCommand(ServiceRequestServiceRequestCreatedEventDTO event) {
+    return new InboxEventCommand<>(
         UUID.randomUUID(),
         "service-request",
         ServiceRequestDomainEventType.SERVICE_REQUEST_CREATED.getValue(),

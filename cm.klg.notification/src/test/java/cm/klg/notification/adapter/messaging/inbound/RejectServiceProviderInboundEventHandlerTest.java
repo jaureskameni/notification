@@ -30,9 +30,9 @@ class RejectServiceProviderInboundEventHandlerTest {
 
   @Test
   void shouldExposeEventTypeAndDataType() {
-    assertThat(handler.getEventType())
+    assertThat(handler.handledEventType())
         .isEqualTo(ServiceProviderDomainEventType.SERVICE_PROVIDER_REJECTED.getValue());
-    assertThat(handler.getDataType())
+    assertThat(handler.payloadType())
         .isEqualTo(ServiceProviderServiceProviderRejectedEventDTO.class);
   }
 
@@ -41,7 +41,7 @@ class RejectServiceProviderInboundEventHandlerTest {
     var event = givenRejectedEvent();
     var inboxEventCommand = givenInboxEventCommand(event);
 
-    handler.handle(event, inboxEventCommand);
+    handler.handle(inboxEventCommand);
 
     verify(messagingInboundMapper).toRejectedNotificationCommand(event);
     verify(createNotificationUseCase).execute(any());
@@ -56,7 +56,7 @@ class RejectServiceProviderInboundEventHandlerTest {
     when(messagingInboundMapper.toRejectedNotificationCommand(event)).thenReturn(command);
     doThrow(new IllegalStateException("boom")).when(createNotificationUseCase).execute(command);
 
-    assertThatThrownBy(() -> handler.handle(event, inboxEventCommand))
+    assertThatThrownBy(() -> handler.handle(inboxEventCommand))
         .isInstanceOf(IllegalStateException.class)
         .hasMessage("boom");
   }
@@ -70,7 +70,7 @@ class RejectServiceProviderInboundEventHandlerTest {
     var realFlowHandler =
         new RejectServiceProviderInboundEventHandler(mockUseCase, new MessagingInboundMapperImpl());
 
-    realFlowHandler.handle(event, inboxEventCommand);
+    realFlowHandler.handle(inboxEventCommand);
 
     verify(mockUseCase).execute(any(CreateNotificationUseCase.CreateNotificationCommand.class));
   }
@@ -82,9 +82,9 @@ class RejectServiceProviderInboundEventHandlerTest {
         .serviceProviderId(UUID.randomUUID());
   }
 
-  private static InboxEventCommand givenInboxEventCommand(
-      ServiceProviderServiceProviderRejectedEventDTO event) {
-    return new InboxEventCommand(
+  private static InboxEventCommand<ServiceProviderServiceProviderRejectedEventDTO>
+      givenInboxEventCommand(ServiceProviderServiceProviderRejectedEventDTO event) {
+    return new InboxEventCommand<>(
         UUID.randomUUID(),
         "service-provider",
         ServiceProviderDomainEventType.SERVICE_PROVIDER_REJECTED.getValue(),

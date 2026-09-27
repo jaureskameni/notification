@@ -34,12 +34,12 @@ class CreateUserInboundEventHandlerTest {
 
   @Test
   void shouldExposeUserCreatedEventTypeTest() {
-    assertThat(handler.getEventType()).isEqualTo(UamDomainEventType.USER_CREATED.getValue());
+    assertThat(handler.handledEventType()).isEqualTo(UamDomainEventType.USER_CREATED.getValue());
   }
 
   @Test
   void shouldExposeUamUserCreatedEventDataTypeTest() {
-    assertThat(handler.getDataType()).isEqualTo(UamUserCreatedEventDTO.class);
+    assertThat(handler.payloadType()).isEqualTo(UamUserCreatedEventDTO.class);
   }
 
   @Test
@@ -54,9 +54,9 @@ class CreateUserInboundEventHandlerTest {
             .email("john.doe@example.com")
             .phoneNumber(new UamPhoneNumberDTO().countryCode("+237").number("699999999"))
             .createdAt(createdAt);
-    InboxEventCommand inboxEventCommand = givenInboxEventCommand(event);
+    InboxEventCommand<UamUserCreatedEventDTO> inboxEventCommand = givenInboxEventCommand(event);
 
-    handler.handle(event, inboxEventCommand);
+    handler.handle(inboxEventCommand);
 
     verify(messagingInboundMapper).toCreateUserCommand(event);
     verify(createNewUserUseCase).execute(any());
@@ -65,13 +65,13 @@ class CreateUserInboundEventHandlerTest {
   @Test
   void shouldPropagateExceptionRaisedByUseCaseTest() {
     UamUserCreatedEventDTO event = givenUserCreatedEvent();
-    InboxEventCommand inboxEventCommand = givenInboxEventCommand(event);
+    InboxEventCommand<UamUserCreatedEventDTO> inboxEventCommand = givenInboxEventCommand(event);
     CreateNewUserUseCase.CreateNewUserCommand command = givenCreateUserCommand();
 
     when(messagingInboundMapper.toCreateUserCommand(event)).thenReturn(command);
     doThrow(new IllegalStateException("boom")).when(createNewUserUseCase).execute(command);
 
-    assertThatThrownBy(() -> handler.handle(event, inboxEventCommand))
+    assertThatThrownBy(() -> handler.handle(inboxEventCommand))
         .isInstanceOf(IllegalStateException.class)
         .hasMessage("boom");
   }
@@ -88,14 +88,14 @@ class CreateUserInboundEventHandlerTest {
             .email("john.doe@example.com")
             .phoneNumber(new UamPhoneNumberDTO().countryCode("+237").number("699999999"))
             .createdAt(createdAt);
-    InboxEventCommand inboxEventCommand = givenInboxEventCommand(event);
+    InboxEventCommand<UamUserCreatedEventDTO> inboxEventCommand = givenInboxEventCommand(event);
 
     UserRepository userRepository = mock(UserRepository.class);
     CreateUserInboundEventHandler realFlowHandler =
         new CreateUserInboundEventHandler(
             new CreateNewUserUseCase(userRepository), new MessagingInboundMapperImpl());
 
-    realFlowHandler.handle(event, inboxEventCommand);
+    realFlowHandler.handle(inboxEventCommand);
 
     ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
     verify(userRepository).insertIfAbsent(userCaptor.capture());
@@ -125,8 +125,9 @@ class CreateUserInboundEventHandlerTest {
         .createdAt(LocalDateTime.now().minusMinutes(10));
   }
 
-  private static InboxEventCommand givenInboxEventCommand(UamUserCreatedEventDTO event) {
-    return new InboxEventCommand(
+  private static InboxEventCommand<UamUserCreatedEventDTO> givenInboxEventCommand(
+      UamUserCreatedEventDTO event) {
+    return new InboxEventCommand<>(
         UUID.randomUUID(),
         "user",
         UamDomainEventType.USER_CREATED.getValue(),
