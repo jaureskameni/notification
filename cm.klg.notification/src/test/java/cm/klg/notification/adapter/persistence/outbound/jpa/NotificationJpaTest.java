@@ -20,7 +20,7 @@ class NotificationJpaTest {
     notification.setId(id);
     notification.setRecipientId(recipientId);
     notification.setActorId(actorId);
-    notification.setNotificationType("SERVICE_PROVIDER_CREATED");
+    notification.setNotificationType("SERVICE_PROVIDER_APPROVED");
     notification.setReferenceType("SERVICE_PROVIDER");
     notification.setReferenceId(referenceId);
     notification.setStatus("UNREAD");

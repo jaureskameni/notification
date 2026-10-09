@@ -13,6 +13,8 @@ public interface NotificationViews {
 
   UUID getReferenceId();
 
+  @Nullable String getReason();
+
   String getNotificationType();
 
   String getReferenceType();

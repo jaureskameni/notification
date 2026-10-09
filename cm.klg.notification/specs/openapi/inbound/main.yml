@@ -128,6 +128,9 @@ components:
           $ref: "#/components/schemas/NotificationType"
         referenceType:
           $ref: "#/components/schemas/ReferenceType"
+        reason:
+          type: "string"
+          description: "Rejection reason code, when applicable."
         status:
           $ref: "#/components/schemas/NotificationStatus"
         createdAt:
@@ -175,9 +178,10 @@ components:
       - "SERVICE_REQUEST_ACCEPTED"
       - "SERVICE_REQUEST_REJECTED"
       - "SERVICE_REQUEST_CANCELLED"
-      - "SERVICE_PROVIDER_CREATED"
       - "SERVICE_PROVIDER_APPROVED"
       - "SERVICE_PROVIDER_REJECTED"
+      - "SERVICE_PROVIDER_PROFILE_IMAGE_APPROVED"
+      - "SERVICE_PROVIDER_PROFILE_IMAGE_REJECTED"
     ReferenceType:
       type: "string"
       enum:

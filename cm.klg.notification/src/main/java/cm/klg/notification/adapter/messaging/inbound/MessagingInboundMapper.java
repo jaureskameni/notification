@@ -8,6 +8,7 @@ import cm.klg.notification.application.usecase.UpdateUserUseCase;
 import cm.klg.notification.domaine.notification.NotificationReferenceId;
 import cm.klg.notification.domaine.notification.NotificationType;
 import cm.klg.notification.domaine.notification.ReferenceType;
+import cm.klg.notification.domaine.notification.RejectionReason;
 import cm.klg.notification.domaine.user.UserId;
 import org.mapstruct.BeanMapping;
 import org.mapstruct.InjectionStrategy;
@@ -15,7 +16,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
 import org.openapitools.model.ServiceProviderServiceProviderApprovedEventDTO;
-import org.openapitools.model.ServiceProviderServiceProviderCreatedEventDTO;
+import org.openapitools.model.ServiceProviderServiceProviderProfileImageApprovedEventDTO;
+import org.openapitools.model.ServiceProviderServiceProviderProfileImageRejectedEventDTO;
 import org.openapitools.model.ServiceProviderServiceProviderRejectedEventDTO;
 import org.openapitools.model.ServiceRequestServiceRequestAcceptedEventDTO;
 import org.openapitools.model.ServiceRequestServiceRequestCancelledEventDTO;
@@ -50,16 +52,6 @@ public interface MessagingInboundMapper {
   UpdateUserUseCase.UpdateUserCommand toUpdateUserCommand(
       UamUserUpdatedEventDTO userUpdatedEventDTO);
 
-  default CreateNotificationUseCase.CreateNotificationCommand toCreatedNotificationCommand(
-      ServiceProviderServiceProviderCreatedEventDTO event) {
-    return new CreateNotificationUseCase.CreateNotificationCommand(
-        UserId.from(event.getUserId()),
-        UserId.from(event.getUserId()),
-        NotificationType.SERVICE_PROVIDER_CREATED,
-        ReferenceType.SERVICE_PROVIDER,
-        NotificationReferenceId.from(event.getServiceProviderId()));
-  }
-
   default CreateNotificationUseCase.CreateNotificationCommand toApprovedNotificationCommand(
       ServiceProviderServiceProviderApprovedEventDTO event) {
     return new CreateNotificationUseCase.CreateNotificationCommand(
@@ -70,6 +62,29 @@ public interface MessagingInboundMapper {
         NotificationReferenceId.from(event.getServiceProviderId()));
   }
 
+  default CreateNotificationUseCase.CreateNotificationCommand
+      toProfileImageApprovedNotificationCommand(
+          ServiceProviderServiceProviderProfileImageApprovedEventDTO event) {
+    return new CreateNotificationUseCase.CreateNotificationCommand(
+        UserId.from(event.getUserId()),
+        UserId.from(event.getApprovedBy()),
+        NotificationType.SERVICE_PROVIDER_PROFILE_IMAGE_APPROVED,
+        ReferenceType.SERVICE_PROVIDER,
+        NotificationReferenceId.from(event.getServiceProviderId()));
+  }
+
+  default CreateNotificationUseCase.CreateNotificationCommand
+      toProfileImageRejectedNotificationCommand(
+          ServiceProviderServiceProviderProfileImageRejectedEventDTO event) {
+    return new CreateNotificationUseCase.CreateNotificationCommand(
+        UserId.from(event.getUserId()),
+        UserId.from(event.getRejectedBy()),
+        NotificationType.SERVICE_PROVIDER_PROFILE_IMAGE_REJECTED,
+        ReferenceType.SERVICE_PROVIDER,
+        NotificationReferenceId.from(event.getServiceProviderId()),
+        RejectionReason.from(event.getReason() == null ? null : event.getReason().getValue()));
+  }
+
   default CreateNotificationUseCase.CreateNotificationCommand toRejectedNotificationCommand(
       ServiceProviderServiceProviderRejectedEventDTO event) {
     return new CreateNotificationUseCase.CreateNotificationCommand(
@@ -77,7 +92,8 @@ public interface MessagingInboundMapper {
         UserId.from(event.getRejectedBy()),
         NotificationType.SERVICE_PROVIDER_REJECTED,
         ReferenceType.SERVICE_PROVIDER,
-        NotificationReferenceId.from(event.getServiceProviderId()));
+        NotificationReferenceId.from(event.getServiceProviderId()),
+        RejectionReason.from(event.getReason() == null ? null : event.getReason().getValue()));
   }
 
   default CreateNotificationUseCase.CreateNotificationCommand

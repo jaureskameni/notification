@@ -11,4 +11,9 @@
 			columnName="c_content" />
 	</changeSet>
 
+	<changeSet id="NOTIF-09:1" author="kameni.nguematcha">
+		<addColumn tableName="t_notification">
+			<column name="c_reason" type="varchar(55)" />
+		</addColumn>
+	</changeSet>
 </databaseChangeLog>

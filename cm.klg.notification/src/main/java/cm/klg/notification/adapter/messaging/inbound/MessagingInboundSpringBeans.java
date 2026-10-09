@@ -29,14 +29,6 @@ public class MessagingInboundSpringBeans {
   }
 
   @Bean
-  public CreateServiceProviderInboundEventHandler createServiceProviderInboundEventHandler(
-      CreateNotificationUseCase createNotificationUseCase,
-      MessagingInboundMapper messagingInboundMapper) {
-    return new CreateServiceProviderInboundEventHandler(
-        createNotificationUseCase, messagingInboundMapper);
-  }
-
-  @Bean
   public ApproveServiceProviderInboundEventHandler approveServiceProviderInboundEventHandler(
       CreateNotificationUseCase createNotificationUseCase,
       MessagingInboundMapper messagingInboundMapper) {
@@ -49,6 +41,24 @@ public class MessagingInboundSpringBeans {
       CreateNotificationUseCase createNotificationUseCase,
       MessagingInboundMapper messagingInboundMapper) {
     return new RejectServiceProviderInboundEventHandler(
+        createNotificationUseCase, messagingInboundMapper);
+  }
+
+  @Bean
+  public ApproveServiceProviderProfileImageInboundEventHandler
+      approveServiceProviderProfileImageInboundEventHandler(
+          CreateNotificationUseCase createNotificationUseCase,
+          MessagingInboundMapper messagingInboundMapper) {
+    return new ApproveServiceProviderProfileImageInboundEventHandler(
+        createNotificationUseCase, messagingInboundMapper);
+  }
+
+  @Bean
+  public RejectServiceProviderProfileImageInboundEventHandler
+      rejectServiceProviderProfileImageInboundEventHandler(
+          CreateNotificationUseCase createNotificationUseCase,
+          MessagingInboundMapper messagingInboundMapper) {
+    return new RejectServiceProviderProfileImageInboundEventHandler(
         createNotificationUseCase, messagingInboundMapper);
   }
 

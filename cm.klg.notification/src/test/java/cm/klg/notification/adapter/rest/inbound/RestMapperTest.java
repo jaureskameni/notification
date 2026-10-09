@@ -2,13 +2,17 @@ package cm.klg.notification.adapter.rest.inbound;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import cm.klg.generated.notifications.adapter.rest.inbound.dto.NotificationStatusDTO;
+import cm.klg.notification.application.NotificationViews;
 import cm.klg.notification.application.usecase.GetMyNotificationsUseCase;
 import cm.klg.notification.application.usecase.GetMyUnreadNotificationCountUseCase;
 import cm.klg.notification.domaine.notification.NotificationId;
 import cm.klg.notification.domaine.notification.NotificationStatus;
 import cm.klg.notification.domaine.user.UserId;
+import java.time.LocalDateTime;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -103,6 +107,23 @@ class RestMapperTest {
 
     assertThat(command.recipientId()).isEqualTo(currentUserId);
     assertThat(command.status()).isEqualTo(NotificationStatus.READ);
+  }
+
+  @Test
+  void shouldIncludeRejectionReasonInNotificationDTO() {
+    var views = mock(NotificationViews.class);
+    when(views.getId()).thenReturn(UUID.randomUUID());
+    when(views.getActorId()).thenReturn(UUID.randomUUID());
+    when(views.getNotificationType()).thenReturn("SERVICE_PROVIDER_REJECTED");
+    when(views.getReferenceType()).thenReturn("SERVICE_PROVIDER");
+    when(views.getReferenceId()).thenReturn(UUID.randomUUID());
+    when(views.getReason()).thenReturn("CNI_EXPIRED");
+    when(views.getStatus()).thenReturn("UNREAD");
+    when(views.getCreatedAt()).thenReturn(LocalDateTime.now());
+
+    var dto = restMapper.toNotificationDTO(views);
+
+    assertThat(dto.getReason()).isEqualTo("CNI_EXPIRED");
   }
 
   @Test
