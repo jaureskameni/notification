@@ -39,6 +39,9 @@ class NotificationJpa {
   @Column(name = "c_reference_id")
   private UUID referenceId;
 
+  @Column(name = "c_reason")
+  private String reason;
+
   @Column(name = "c_status")
   private String status;
 

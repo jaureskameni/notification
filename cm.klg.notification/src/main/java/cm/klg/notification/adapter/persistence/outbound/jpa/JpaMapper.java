@@ -2,12 +2,14 @@ package cm.klg.notification.adapter.persistence.outbound.jpa;
 
 import cm.klg.common.base.domain.CreatedAt;
 import cm.klg.notification.domaine.notification.Notification;
+import cm.klg.notification.domaine.notification.NotificationDetails;
 import cm.klg.notification.domaine.notification.NotificationId;
 import cm.klg.notification.domaine.notification.NotificationReferenceId;
 import cm.klg.notification.domaine.notification.NotificationState;
 import cm.klg.notification.domaine.notification.NotificationStatus;
 import cm.klg.notification.domaine.notification.NotificationType;
 import cm.klg.notification.domaine.notification.ReferenceType;
+import cm.klg.notification.domaine.notification.RejectionReason;
 import cm.klg.notification.domaine.user.Email;
 import cm.klg.notification.domaine.user.Firstname;
 import cm.klg.notification.domaine.user.Lastname;
@@ -59,11 +61,16 @@ interface JpaMapper {
   @Mapping(target = "notificationType", source = "notificationType")
   @Mapping(target = "referenceType", source = "referenceType")
   @Mapping(target = "referenceId", source = "referenceId.value")
+  @Mapping(target = "reason", source = "reason")
   @Mapping(target = "status", source = "status")
   @Mapping(target = "createdAt", source = "createdAt.value")
   @Mapping(target = "readAt", source = "readAt.value")
   @Mapping(target = "openedAt", source = "openedAt.value")
   NotificationJpa fromNotificationDomain(Notification notification);
+
+  default String map(RejectionReason reason) {
+    return reason == RejectionReason.NULL ? null : reason.value();
+  }
 
   @BeanMapping(ignoreByDefault = true)
   @Mapping(target = "id", source = "id.value")
@@ -72,6 +79,7 @@ interface JpaMapper {
   @Mapping(target = "notificationType", source = "notificationType")
   @Mapping(target = "referenceType", source = "referenceType")
   @Mapping(target = "referenceId", source = "referenceId.value")
+  @Mapping(target = "reason", source = "reason")
   @Mapping(target = "status", source = "status")
   @Mapping(target = "createdAt", source = "createdAt.value")
   @Mapping(target = "readAt", source = "readAt.value")
@@ -91,11 +99,13 @@ interface JpaMapper {
                 : CreatedAt.from(notificationJpa.getOpenedAt()));
     return Notification.reconstitute(
         NotificationId.from(notificationJpa.getId()),
-        UserId.from(notificationJpa.getRecipientId()),
-        UserId.from(notificationJpa.getActorId()),
-        NotificationType.valueOf(notificationJpa.getNotificationType()),
-        ReferenceType.valueOf(notificationJpa.getReferenceType()),
-        NotificationReferenceId.from(notificationJpa.getReferenceId()),
+        new NotificationDetails(
+            UserId.from(notificationJpa.getRecipientId()),
+            UserId.from(notificationJpa.getActorId()),
+            NotificationType.valueOf(notificationJpa.getNotificationType()),
+            ReferenceType.valueOf(notificationJpa.getReferenceType()),
+            NotificationReferenceId.from(notificationJpa.getReferenceId()),
+            RejectionReason.from(notificationJpa.getReason())),
         state,
         CreatedAt.from(notificationJpa.getCreatedAt()));
   }

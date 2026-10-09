@@ -11,6 +11,7 @@ import cm.klg.notification.application.usecase.GetMyUnreadNotificationCountUseCa
 import cm.klg.notification.application.usecase.OpenMyNotificationUseCase;
 import cm.klg.notification.domaine.notification.NotificationId;
 import cm.klg.notification.domaine.notification.NotificationStatus;
+import cm.klg.notification.domaine.notification.RejectionReason;
 import cm.klg.notification.domaine.user.UserId;
 import org.jspecify.annotations.Nullable;
 import org.mapstruct.InjectionStrategy;
@@ -63,6 +64,8 @@ public interface RestMapper {
             .referenceId(views.getReferenceId())
             .status(NotificationStatusDTO.fromValue(views.getStatus()))
             .createdAt(views.getCreatedAt());
+    RejectionReason reason = RejectionReason.from(views.getReason());
+    if (reason != RejectionReason.NULL) dto.reason(reason.value());
     if (views.getReadAt() != null) dto.readAt(views.getReadAt());
     if (views.getOpenedAt() != null) dto.openedAt(views.getOpenedAt());
     return dto;

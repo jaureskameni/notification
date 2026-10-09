@@ -7,17 +7,18 @@ import org.junit.jupiter.api.Test;
 class NotificationTypeTest {
 
   @Test
-  void shouldHaveSevenTypes() {
-    assertThat(NotificationType.values()).hasSize(7);
+  void shouldHaveEightTypes() {
+    assertThat(NotificationType.values()).hasSize(8);
   }
 
   @Test
   void shouldContainAllServiceProviderTypes() {
     assertThat(NotificationType.values())
         .contains(
-            NotificationType.SERVICE_PROVIDER_CREATED,
             NotificationType.SERVICE_PROVIDER_APPROVED,
-            NotificationType.SERVICE_PROVIDER_REJECTED);
+            NotificationType.SERVICE_PROVIDER_REJECTED,
+            NotificationType.SERVICE_PROVIDER_PROFILE_IMAGE_APPROVED,
+            NotificationType.SERVICE_PROVIDER_PROFILE_IMAGE_REJECTED);
   }
 
   @Test

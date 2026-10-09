@@ -15,6 +15,7 @@ public class Notification {
   private final NotificationType notificationType;
   private final ReferenceType referenceType;
   private final NotificationReferenceId referenceId;
+  private final RejectionReason reason;
   private final CreatedAt createdAt;
   private NotificationStatus status;
   @Nullable private CreatedAt readAt;
@@ -22,19 +23,16 @@ public class Notification {
 
   public Notification(
       NotificationId id,
-      UserId recipientId,
-      UserId actorId,
-      NotificationType notificationType,
-      ReferenceType referenceType,
-      NotificationReferenceId referenceId,
+      NotificationDetails details,
       NotificationState state,
       CreatedAt createdAt) {
     this.id = id;
-    this.recipientId = recipientId;
-    this.actorId = actorId;
-    this.notificationType = notificationType;
-    this.referenceType = referenceType;
-    this.referenceId = referenceId;
+    this.recipientId = details.recipientId();
+    this.actorId = details.actorId();
+    this.notificationType = details.notificationType();
+    this.referenceType = details.referenceType();
+    this.referenceId = details.referenceId();
+    this.reason = details.reason();
     this.status = state.status();
     this.createdAt = createdAt;
     this.readAt = state.readAt();
@@ -47,13 +45,21 @@ public class Notification {
       NotificationType notificationType,
       ReferenceType referenceType,
       NotificationReferenceId referenceId) {
+    return of(
+        recipientId, actorId, notificationType, referenceType, referenceId, RejectionReason.NULL);
+  }
+
+  public static Notification of(
+      UserId recipientId,
+      UserId actorId,
+      NotificationType notificationType,
+      ReferenceType referenceType,
+      NotificationReferenceId referenceId,
+      RejectionReason reason) {
     return new Notification(
         NotificationId.generate(),
-        recipientId,
-        actorId,
-        notificationType,
-        referenceType,
-        referenceId,
+        new NotificationDetails(
+            recipientId, actorId, notificationType, referenceType, referenceId, reason),
         NotificationState.unread(),
         CreatedAt.from(LocalDateTime.now()));
   }
@@ -81,14 +87,9 @@ public class Notification {
 
   public static Notification reconstitute(
       NotificationId id,
-      UserId recipientId,
-      UserId actorId,
-      NotificationType notificationType,
-      ReferenceType referenceType,
-      NotificationReferenceId referenceId,
+      NotificationDetails details,
       NotificationState state,
       CreatedAt createdAt) {
-    return new Notification(
-        id, recipientId, actorId, notificationType, referenceType, referenceId, state, createdAt);
+    return new Notification(id, details, state, createdAt);
   }
 }

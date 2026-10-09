@@ -5,6 +5,7 @@ import cm.klg.notification.domaine.notification.Notification;
 import cm.klg.notification.domaine.notification.NotificationReferenceId;
 import cm.klg.notification.domaine.notification.NotificationType;
 import cm.klg.notification.domaine.notification.ReferenceType;
+import cm.klg.notification.domaine.notification.RejectionReason;
 import cm.klg.notification.domaine.user.UserId;
 import lombok.RequiredArgsConstructor;
 
@@ -19,7 +20,8 @@ public class CreateNotificationUseCase {
             command.actorId(),
             command.notificationType(),
             command.referenceType(),
-            command.referenceId());
+            command.referenceId(),
+            command.reason());
     notificationRepository.insert(notification);
   }
 
@@ -28,5 +30,16 @@ public class CreateNotificationUseCase {
       UserId actorId,
       NotificationType notificationType,
       ReferenceType referenceType,
-      NotificationReferenceId referenceId) {}
+      NotificationReferenceId referenceId,
+      RejectionReason reason) {
+    public CreateNotificationCommand(
+        UserId recipientId,
+        UserId actorId,
+        NotificationType notificationType,
+        ReferenceType referenceType,
+        NotificationReferenceId referenceId) {
+      this(
+          recipientId, actorId, notificationType, referenceType, referenceId, RejectionReason.NULL);
+    }
+  }
 }

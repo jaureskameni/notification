@@ -35,7 +35,7 @@ class OpenMyNotificationUseCaseTest {
         Notification.of(
             recipientId,
             UserId.from(UUID.randomUUID()),
-            NotificationType.SERVICE_PROVIDER_CREATED,
+            NotificationType.SERVICE_PROVIDER_APPROVED,
             ReferenceType.SERVICE_PROVIDER,
             NotificationReferenceId.from(UUID.randomUUID()));
 
@@ -63,7 +63,7 @@ class OpenMyNotificationUseCaseTest {
         Notification.of(
             recipientId,
             UserId.from(UUID.randomUUID()),
-            NotificationType.SERVICE_PROVIDER_CREATED,
+            NotificationType.SERVICE_PROVIDER_APPROVED,
             ReferenceType.SERVICE_PROVIDER,
             NotificationReferenceId.from(UUID.randomUUID()));
 
@@ -86,7 +86,7 @@ class OpenMyNotificationUseCaseTest {
         Notification.of(
             recipientId,
             UserId.from(UUID.randomUUID()),
-            NotificationType.SERVICE_PROVIDER_CREATED,
+            NotificationType.SERVICE_PROVIDER_APPROVED,
             ReferenceType.SERVICE_PROVIDER,
             NotificationReferenceId.from(UUID.randomUUID()));
 

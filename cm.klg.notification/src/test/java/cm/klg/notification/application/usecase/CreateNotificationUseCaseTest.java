@@ -8,6 +8,7 @@ import cm.klg.notification.domaine.notification.Notification;
 import cm.klg.notification.domaine.notification.NotificationReferenceId;
 import cm.klg.notification.domaine.notification.NotificationType;
 import cm.klg.notification.domaine.notification.ReferenceType;
+import cm.klg.notification.domaine.notification.RejectionReason;
 import cm.klg.notification.domaine.user.UserId;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -35,7 +36,8 @@ class CreateNotificationUseCaseTest {
             UserId.from(actorId),
             NotificationType.SERVICE_PROVIDER_APPROVED,
             ReferenceType.SERVICE_PROVIDER,
-            NotificationReferenceId.from(serviceProviderId)));
+            NotificationReferenceId.from(serviceProviderId),
+            RejectionReason.from("CNI_EXPIRED")));
 
     ArgumentCaptor<Notification> notificationCaptor = ArgumentCaptor.forClass(Notification.class);
     verify(notificationRepository).insert(notificationCaptor.capture());
@@ -48,6 +50,7 @@ class CreateNotificationUseCaseTest {
                   .isEqualTo(NotificationType.SERVICE_PROVIDER_APPROVED);
               assertThat(notification.getReferenceType()).isEqualTo(ReferenceType.SERVICE_PROVIDER);
               assertThat(notification.getReferenceId().value()).isEqualTo(serviceProviderId);
+              assertThat(notification.getReason()).isEqualTo(RejectionReason.from("CNI_EXPIRED"));
             });
   }
 }

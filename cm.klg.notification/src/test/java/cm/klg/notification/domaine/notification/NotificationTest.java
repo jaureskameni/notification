@@ -20,16 +20,18 @@ class NotificationTest {
         Notification.of(
             recipientId,
             actorId,
-            NotificationType.SERVICE_PROVIDER_CREATED,
+            NotificationType.SERVICE_PROVIDER_APPROVED,
             ReferenceType.SERVICE_PROVIDER,
-            NotificationReferenceId.from(UUID.randomUUID()));
+            NotificationReferenceId.from(UUID.randomUUID()),
+            RejectionReason.from("CNI_EXPIRED"));
 
     assertThat(notification.getId()).isNotNull();
     assertThat(notification.getRecipientId()).isEqualTo(recipientId);
     assertThat(notification.getActorId()).isEqualTo(actorId);
     assertThat(notification.getNotificationType())
-        .isEqualTo(NotificationType.SERVICE_PROVIDER_CREATED);
+        .isEqualTo(NotificationType.SERVICE_PROVIDER_APPROVED);
     assertThat(notification.getReferenceType()).isEqualTo(ReferenceType.SERVICE_PROVIDER);
+    assertThat(notification.getReason()).isEqualTo(RejectionReason.from("CNI_EXPIRED"));
     assertThat(notification.getStatus()).isEqualTo(NotificationStatus.UNREAD);
     assertThat(notification.getReadAt()).isNull();
     assertThat(notification.getOpenedAt()).isNull();
@@ -41,7 +43,7 @@ class NotificationTest {
         Notification.of(
             UserId.from(UUID.randomUUID()),
             UserId.from(UUID.randomUUID()),
-            NotificationType.SERVICE_PROVIDER_CREATED,
+            NotificationType.SERVICE_PROVIDER_APPROVED,
             ReferenceType.SERVICE_PROVIDER,
             NotificationReferenceId.from(UUID.randomUUID()));
 
@@ -59,7 +61,7 @@ class NotificationTest {
         Notification.of(
             recipientId,
             UserId.from(UUID.randomUUID()),
-            NotificationType.SERVICE_PROVIDER_CREATED,
+            NotificationType.SERVICE_PROVIDER_APPROVED,
             ReferenceType.SERVICE_PROVIDER,
             NotificationReferenceId.from(UUID.randomUUID()));
 
@@ -77,7 +79,7 @@ class NotificationTest {
         Notification.of(
             recipientId,
             UserId.from(UUID.randomUUID()),
-            NotificationType.SERVICE_PROVIDER_CREATED,
+            NotificationType.SERVICE_PROVIDER_APPROVED,
             ReferenceType.SERVICE_PROVIDER,
             NotificationReferenceId.from(UUID.randomUUID()));
 
@@ -94,7 +96,7 @@ class NotificationTest {
         Notification.of(
             recipientId,
             UserId.from(UUID.randomUUID()),
-            NotificationType.SERVICE_PROVIDER_CREATED,
+            NotificationType.SERVICE_PROVIDER_APPROVED,
             ReferenceType.SERVICE_PROVIDER,
             NotificationReferenceId.from(UUID.randomUUID()));
 
@@ -122,17 +124,20 @@ class NotificationTest {
     Notification notification =
         Notification.reconstitute(
             id,
-            recipientId,
-            actorId,
-            NotificationType.SERVICE_PROVIDER_APPROVED,
-            ReferenceType.SERVICE_PROVIDER,
-            referenceId,
+            new NotificationDetails(
+                recipientId,
+                actorId,
+                NotificationType.SERVICE_PROVIDER_APPROVED,
+                ReferenceType.SERVICE_PROVIDER,
+                referenceId,
+                RejectionReason.from("CNI_EXPIRED")),
             state,
             createdAt);
 
     assertThat(notification.getId()).isEqualTo(id);
     assertThat(notification.getRecipientId()).isEqualTo(recipientId);
     assertThat(notification.getActorId()).isEqualTo(actorId);
+    assertThat(notification.getReason()).isEqualTo(RejectionReason.from("CNI_EXPIRED"));
     assertThat(notification.getStatus()).isEqualTo(NotificationStatus.OPENED);
     assertThat(notification.getReadAt()).isEqualTo(readAt);
     assertThat(notification.getOpenedAt()).isEqualTo(openedAt);
