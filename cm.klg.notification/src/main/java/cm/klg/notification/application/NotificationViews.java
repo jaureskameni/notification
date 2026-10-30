@@ -9,7 +9,7 @@ public interface NotificationViews {
 
   UUID getRecipientId();
 
-  UUID getActorId();
+  UserView getActor();
 
   UUID getReferenceId();
 

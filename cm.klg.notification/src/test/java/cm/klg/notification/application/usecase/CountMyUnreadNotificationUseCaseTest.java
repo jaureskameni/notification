@@ -15,22 +15,22 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class GetMyUnreadNotificationCountUseCaseTest {
+class CountMyUnreadNotificationUseCaseTest {
 
   @Mock private NotificationRepository notificationRepository;
 
-  @InjectMocks private GetMyUnreadNotificationCountUseCase getMyUnreadNotificationCountUseCase;
+  @InjectMocks private CountMyUnreadNotificationUseCase countMyUnreadNotificationUseCase;
 
   @Test
   void shouldCountUnreadNotificationsTest() {
     UserId recipientId = UserId.from(UUID.randomUUID());
-    GetMyUnreadNotificationCountUseCase.Command command =
-        new GetMyUnreadNotificationCountUseCase.Command(recipientId, NotificationStatus.UNREAD);
+    CountMyUnreadNotificationUseCase.Command command =
+        new CountMyUnreadNotificationUseCase.Command(recipientId, NotificationStatus.UNREAD);
 
     when(notificationRepository.countByRecipientIdAndStatus(recipientId, NotificationStatus.UNREAD))
         .thenReturn(5L);
 
-    long count = getMyUnreadNotificationCountUseCase.execute(command);
+    long count = countMyUnreadNotificationUseCase.execute(command);
 
     assertThat(count).isEqualTo(5);
     verify(notificationRepository)
@@ -40,13 +40,13 @@ class GetMyUnreadNotificationCountUseCaseTest {
   @Test
   void shouldReturnZeroWhenNoNotificationsTest() {
     UserId recipientId = UserId.from(UUID.randomUUID());
-    GetMyUnreadNotificationCountUseCase.Command command =
-        new GetMyUnreadNotificationCountUseCase.Command(recipientId, NotificationStatus.UNREAD);
+    CountMyUnreadNotificationUseCase.Command command =
+        new CountMyUnreadNotificationUseCase.Command(recipientId, NotificationStatus.UNREAD);
 
     when(notificationRepository.countByRecipientIdAndStatus(recipientId, NotificationStatus.UNREAD))
         .thenReturn(0L);
 
-    long count = getMyUnreadNotificationCountUseCase.execute(command);
+    long count = countMyUnreadNotificationUseCase.execute(command);
 
     assertThat(count).isZero();
   }
@@ -54,13 +54,13 @@ class GetMyUnreadNotificationCountUseCaseTest {
   @Test
   void shouldCountNotificationsByDifferentStatusTest() {
     UserId recipientId = UserId.from(UUID.randomUUID());
-    GetMyUnreadNotificationCountUseCase.Command command =
-        new GetMyUnreadNotificationCountUseCase.Command(recipientId, NotificationStatus.READ);
+    CountMyUnreadNotificationUseCase.Command command =
+        new CountMyUnreadNotificationUseCase.Command(recipientId, NotificationStatus.READ);
 
     when(notificationRepository.countByRecipientIdAndStatus(recipientId, NotificationStatus.READ))
         .thenReturn(3L);
 
-    long count = getMyUnreadNotificationCountUseCase.execute(command);
+    long count = countMyUnreadNotificationUseCase.execute(command);
 
     assertThat(count).isEqualTo(3);
     verify(notificationRepository)
@@ -70,12 +70,12 @@ class GetMyUnreadNotificationCountUseCaseTest {
   @Test
   void shouldHandleNullStatusTest() {
     UserId recipientId = UserId.from(UUID.randomUUID());
-    GetMyUnreadNotificationCountUseCase.Command command =
-        new GetMyUnreadNotificationCountUseCase.Command(recipientId, null);
+    CountMyUnreadNotificationUseCase.Command command =
+        new CountMyUnreadNotificationUseCase.Command(recipientId, null);
 
     when(notificationRepository.countByRecipientIdAndStatus(recipientId, null)).thenReturn(10L);
 
-    long count = getMyUnreadNotificationCountUseCase.execute(command);
+    long count = countMyUnreadNotificationUseCase.execute(command);
 
     assertThat(count).isEqualTo(10);
   }

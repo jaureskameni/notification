@@ -6,7 +6,7 @@ import cm.klg.notification.domaine.user.UserId;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class GetMyUnreadNotificationCountUseCase {
+public class CountMyUnreadNotificationUseCase {
   private final NotificationRepository notificationRepository;
 
   public long execute(Command command) {

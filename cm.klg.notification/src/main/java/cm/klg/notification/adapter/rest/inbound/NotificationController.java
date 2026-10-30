@@ -8,8 +8,8 @@ import cm.klg.generated.notifications.adapter.rest.inbound.api.NotificationsApi;
 import cm.klg.generated.notifications.adapter.rest.inbound.dto.NotificationCountDTO;
 import cm.klg.generated.notifications.adapter.rest.inbound.dto.NotificationPageDTO;
 import cm.klg.generated.notifications.adapter.rest.inbound.dto.NotificationStatusDTO;
+import cm.klg.notification.application.usecase.CountMyUnreadNotificationUseCase;
 import cm.klg.notification.application.usecase.GetMyNotificationsUseCase;
-import cm.klg.notification.application.usecase.GetMyUnreadNotificationCountUseCase;
 import cm.klg.notification.application.usecase.MarkAllMyNotificationsAsReadUseCase;
 import cm.klg.notification.application.usecase.OpenMyNotificationUseCase;
 import cm.klg.notification.domaine.notification.NotificationId;
@@ -26,7 +26,7 @@ public class NotificationController implements NotificationsApi, WithAuthenticat
   private final UseCaseExecutor useCaseExecutor;
   private final RestMapper restMapper;
   private final GetMyNotificationsUseCase getMyNotificationsUseCase;
-  private final GetMyUnreadNotificationCountUseCase getMyUnreadNotificationCountUseCase;
+  private final CountMyUnreadNotificationUseCase countMyUnreadNotificationUseCase;
   private final OpenMyNotificationUseCase openMyNotificationUseCase;
   private final MarkAllMyNotificationsAsReadUseCase markAllMyNotificationsAsReadUseCase;
 
@@ -42,12 +42,12 @@ public class NotificationController implements NotificationsApi, WithAuthenticat
   }
 
   @Override
-  public ResponseEntity<NotificationCountDTO> getMyUnreadNotificationCount(
+  public ResponseEntity<NotificationCountDTO> countMyUnreadNotification(
       NotificationStatusDTO status) {
     long result =
         useCaseExecutor.executeQuery(
             () ->
-                getMyUnreadNotificationCountUseCase.execute(
+                countMyUnreadNotificationUseCase.execute(
                     restMapper.toCountNotificationCommand(getCurrentUserId(), status)));
     return ResponseEntity.status(OK).body(new NotificationCountDTO().numberOfNotification(result));
   }
