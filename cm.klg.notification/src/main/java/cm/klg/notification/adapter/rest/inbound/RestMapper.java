@@ -5,9 +5,11 @@ import cm.klg.generated.notifications.adapter.rest.inbound.dto.NotificationPageD
 import cm.klg.generated.notifications.adapter.rest.inbound.dto.NotificationStatusDTO;
 import cm.klg.generated.notifications.adapter.rest.inbound.dto.NotificationTypeDTO;
 import cm.klg.generated.notifications.adapter.rest.inbound.dto.ReferenceTypeDTO;
+import cm.klg.generated.notifications.adapter.rest.inbound.dto.UserDTO;
 import cm.klg.notification.application.NotificationViews;
+import cm.klg.notification.application.UserView;
+import cm.klg.notification.application.usecase.CountMyUnreadNotificationUseCase;
 import cm.klg.notification.application.usecase.GetMyNotificationsUseCase;
-import cm.klg.notification.application.usecase.GetMyUnreadNotificationCountUseCase;
 import cm.klg.notification.application.usecase.OpenMyNotificationUseCase;
 import cm.klg.notification.domaine.notification.NotificationId;
 import cm.klg.notification.domaine.notification.NotificationStatus;
@@ -58,7 +60,7 @@ public interface RestMapper {
     NotificationDTO dto =
         new NotificationDTO()
             .id(views.getId())
-            .actorId(views.getActorId())
+            .actor(toUserDTO(views.getActor()))
             .notificationType(NotificationTypeDTO.fromValue(views.getNotificationType()))
             .referenceType(ReferenceTypeDTO.fromValue(views.getReferenceType()))
             .referenceId(views.getReferenceId())
@@ -68,6 +70,18 @@ public interface RestMapper {
     if (reason != RejectionReason.NULL) dto.reason(reason.value());
     if (views.getReadAt() != null) dto.readAt(views.getReadAt());
     if (views.getOpenedAt() != null) dto.openedAt(views.getOpenedAt());
+    return dto;
+  }
+
+  default UserDTO toUserDTO(UserView actor) {
+    UserDTO dto =
+        new UserDTO()
+            .id(actor.getId())
+            .lastname(actor.getLastname())
+            .createdAt(actor.getCreatedAt());
+    if (actor.getFirstname() != null) {
+      dto.firstname(actor.getFirstname());
+    }
     return dto;
   }
 
@@ -82,8 +96,8 @@ public interface RestMapper {
     return new OpenMyNotificationUseCase.Command(currentUserId, notificationId);
   }
 
-  default GetMyUnreadNotificationCountUseCase.Command toCountNotificationCommand(
+  default CountMyUnreadNotificationUseCase.Command toCountNotificationCommand(
       UserId currentUserId, NotificationStatusDTO status) {
-    return new GetMyUnreadNotificationCountUseCase.Command(currentUserId, toStatus(status));
+    return new CountMyUnreadNotificationUseCase.Command(currentUserId, toStatus(status));
   }
 }

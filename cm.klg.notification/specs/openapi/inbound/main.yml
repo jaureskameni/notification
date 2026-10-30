@@ -24,14 +24,14 @@ paths:
         required: false
         schema:
           type: "integer"
-          minimum: "0"
+          minimum: 0
       - name: "limit"
         in: "query"
         required: true
         description: "represents the number of service Request to fetch per page."
         schema:
           type: "integer"
-          minimum: "10"
+          minimum: 20
       responses:
         "200":
           description: "A cursor-paginated notification collection."
@@ -44,7 +44,7 @@ paths:
       tags:
       - "Notifications"
       summary: "Get the number of my unread notifications"
-      operationId: "getMyUnreadNotificationCount"
+      operationId: "countMyUnreadNotification"
       security:
       - bearerAuth: []
       parameters:
@@ -106,8 +106,7 @@ components:
       type: "object"
       required:
       - "id"
-      - "referenceId"
-      - "actorId"
+      - "actor"
       - "notificationType"
       - "referenceType"
       - "referenceId"
@@ -120,10 +119,8 @@ components:
         referenceId:
           type: "string"
           format: "uuid"
-        actorId:
-          type: "string"
-          format: "uuid"
-          description: "User that triggered the notification."
+        actor:
+          $ref: "#/components/schemas/User"
         notificationType:
           $ref: "#/components/schemas/NotificationType"
         referenceType:
@@ -140,6 +137,23 @@ components:
           type: "string"
           format: "date-time"
         openedAt:
+          type: "string"
+          format: "date-time"
+    User:
+      type: "object"
+      required:
+      - "id"
+      - "lastname"
+      - "createdAt"
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        firstname:
+          type: "string"
+        lastname:
+          type: "string"
+        createdAt:
           type: "string"
           format: "date-time"
     NotificationPage:

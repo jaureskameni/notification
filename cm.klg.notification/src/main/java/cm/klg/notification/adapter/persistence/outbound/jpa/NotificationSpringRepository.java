@@ -4,27 +4,22 @@ import cm.klg.notification.application.NotificationViews;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
+import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.transaction.annotation.Transactional;
 
-interface NotificationSpringRepository extends JpaRepository<NotificationJpa, UUID> {
+interface NotificationSpringRepository
+    extends JpaRepository<@NonNull NotificationJpa, @NonNull UUID> {
 
-  Optional<NotificationJpa> findAggregateById(UUID id);
-
-  Page<NotificationJpa> findByRecipientIdAndStatusOrderByCreatedAtDesc(
-      UUID recipientId, String status, Pageable pageable);
-
-  Page<NotificationJpa> findByRecipientIdOrderByCreatedAtDesc(UUID recipientId, Pageable pageable);
+  Optional<@NonNull NotificationJpa> findAggregateById(UUID id);
 
   long countByRecipientIdAndStatus(UUID recipientId, String status);
 
   @Modifying
-  @Transactional
   @Query(
       "update NotificationJpa n set n.status = 'READ', n.readAt = :readAt "
           + "where n.recipientId = :recipientId and n.status = 'UNREAD'")
@@ -37,7 +32,10 @@ interface NotificationSpringRepository extends JpaRepository<NotificationJpa, UU
           SELECT
               n.id                        AS id,
               n.recipientId               AS recipientId,
-              n.actorId                   AS actorId,
+              a.id                        AS actorId,
+              a.firstname                 AS actorFirstname,
+              a.lastname                  AS actorLastname,
+              a.createdAt                 AS actorCreatedAt,
               n.referenceId               AS referenceId,
               n.reason                    AS reason,
               n.notificationType          AS notificationType,
@@ -47,6 +45,7 @@ interface NotificationSpringRepository extends JpaRepository<NotificationJpa, UU
               n.readAt                    AS readAt,
               n.openedAt                  AS openedAt
           FROM NotificationJpa n
+          JOIN UserJpa a ON a.id = n.actorId
           WHERE n.recipientId = :recipientId
           ORDER BY n.createdAt DESC\
           """,
@@ -61,7 +60,10 @@ interface NotificationSpringRepository extends JpaRepository<NotificationJpa, UU
           SELECT
               n.id                        AS id,
               n.recipientId               AS recipientId,
-              n.actorId                   AS actorId,
+              u.id                        AS actorId,
+              u.firstname                 AS actorFirstname,
+              u.lastname                  AS actorLastname,
+              u.createdAt                 AS actorCreatedAt,
               n.referenceId               AS referenceId,
               n.reason                    AS reason,
               n.notificationType          AS notificationType,
@@ -71,12 +73,13 @@ interface NotificationSpringRepository extends JpaRepository<NotificationJpa, UU
               n.readAt                    AS readAt,
               n.openedAt                  AS openedAt
           FROM NotificationJpa n
+          JOIN UserJpa u ON u.id = n.actorId
           WHERE n.recipientId = :recipientId AND n.status = :status
           ORDER BY n.createdAt DESC\
           """,
       countQuery =
           "SELECT COUNT(DISTINCT n) FROM NotificationJpa n WHERE"
               + " n.recipientId = :recipientId AND n.status = :status")
-  Page<NotificationViews> findAllNotificationByRecipientIdAndStatusAsView1(
+  Page<@NonNull NotificationViews> findAllNotificationByRecipientIdAndStatusAsView1(
       UUID recipientId, String status, Pageable pageable);
 }

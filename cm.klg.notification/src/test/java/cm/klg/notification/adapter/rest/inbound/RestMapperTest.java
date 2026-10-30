@@ -7,8 +7,9 @@ import static org.mockito.Mockito.when;
 
 import cm.klg.generated.notifications.adapter.rest.inbound.dto.NotificationStatusDTO;
 import cm.klg.notification.application.NotificationViews;
+import cm.klg.notification.application.UserView;
+import cm.klg.notification.application.usecase.CountMyUnreadNotificationUseCase;
 import cm.klg.notification.application.usecase.GetMyNotificationsUseCase;
-import cm.klg.notification.application.usecase.GetMyUnreadNotificationCountUseCase;
 import cm.klg.notification.domaine.notification.NotificationId;
 import cm.klg.notification.domaine.notification.NotificationStatus;
 import cm.klg.notification.domaine.user.UserId;
@@ -102,7 +103,7 @@ class RestMapperTest {
   void shouldMapToCountNotificationCommandTest() {
     UserId currentUserId = UserId.from(UUID.randomUUID());
 
-    GetMyUnreadNotificationCountUseCase.Command command =
+    CountMyUnreadNotificationUseCase.Command command =
         restMapper.toCountNotificationCommand(currentUserId, NotificationStatusDTO.READ);
 
     assertThat(command.recipientId()).isEqualTo(currentUserId);
@@ -111,9 +112,14 @@ class RestMapperTest {
 
   @Test
   void shouldIncludeRejectionReasonInNotificationDTO() {
+    var actor = mock(UserView.class);
+    when(actor.getId()).thenReturn(UUID.randomUUID());
+    when(actor.getLastname()).thenReturn("Doe");
+    when(actor.getCreatedAt()).thenReturn(LocalDateTime.now());
+
     var views = mock(NotificationViews.class);
     when(views.getId()).thenReturn(UUID.randomUUID());
-    when(views.getActorId()).thenReturn(UUID.randomUUID());
+    when(views.getActor()).thenReturn(actor);
     when(views.getNotificationType()).thenReturn("SERVICE_PROVIDER_REJECTED");
     when(views.getReferenceType()).thenReturn("SERVICE_PROVIDER");
     when(views.getReferenceId()).thenReturn(UUID.randomUUID());
@@ -124,6 +130,7 @@ class RestMapperTest {
     var dto = restMapper.toNotificationDTO(views);
 
     assertThat(dto.getReason()).isEqualTo("CNI_EXPIRED");
+    assertThat(dto.getActor().getLastname()).isEqualTo("Doe");
   }
 
   @Test

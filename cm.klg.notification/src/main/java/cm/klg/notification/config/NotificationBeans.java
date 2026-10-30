@@ -5,11 +5,11 @@ import cm.klg.common.base.transaction.DomainToHttpExceptionTranslator;
 import cm.klg.notification.adapter.rest.DefaultDomainToHttpExceptionTranslator;
 import cm.klg.notification.application.outbound.NotificationRepository;
 import cm.klg.notification.application.outbound.UserRepository;
+import cm.klg.notification.application.usecase.CountMyUnreadNotificationUseCase;
 import cm.klg.notification.application.usecase.CreateNewUserUseCase;
 import cm.klg.notification.application.usecase.CreateNotificationUseCase;
 import cm.klg.notification.application.usecase.DeleteUserUseCase;
 import cm.klg.notification.application.usecase.GetMyNotificationsUseCase;
-import cm.klg.notification.application.usecase.GetMyUnreadNotificationCountUseCase;
 import cm.klg.notification.application.usecase.MarkAllMyNotificationsAsReadUseCase;
 import cm.klg.notification.application.usecase.OpenMyNotificationUseCase;
 import cm.klg.notification.application.usecase.UpdateUserUseCase;
@@ -58,9 +58,9 @@ public class NotificationBeans implements TransactionBeansProvider {
   }
 
   @Bean
-  public GetMyUnreadNotificationCountUseCase getMyUnreadNotificationCountUseCase(
+  public CountMyUnreadNotificationUseCase countMyUnreadNotificationUseCase(
       NotificationRepository notificationRepository) {
-    return new GetMyUnreadNotificationCountUseCase(notificationRepository);
+    return new CountMyUnreadNotificationUseCase(notificationRepository);
   }
 
   @Bean

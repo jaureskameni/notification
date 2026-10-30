@@ -78,7 +78,7 @@ class NotificationJpaRepository implements NotificationRepository {
     return new PageData<>(serviceRequestPage.getTotalElements(), serviceRequestPage.getContent());
   }
 
-  private Optional<Notification> loadById(@NonNull NotificationId notificationId) {
+  private Optional<@NonNull Notification> loadById(@NonNull NotificationId notificationId) {
     return notificationSpringRepository
         .findById(notificationId.value())
         .map(jpaMapper::toNotificationDomain);
